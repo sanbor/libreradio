@@ -1,0 +1,650 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000001000000000000001 /* RadioLibreApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001000000000000001 /* RadioLibreApp.swift */; };
+		AA000002000000000000001 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002000000000000001 /* AppError.swift */; };
+		AA000003000000000000001 /* StationDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100003000000000000001 /* StationDTO.swift */; };
+		AA000004000000000000001 /* Country.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004000000000000001 /* Country.swift */; };
+		AA000005000000000000001 /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100005000000000000001 /* Language.swift */; };
+		AA000006000000000000001 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100006000000000000001 /* Tag.swift */; };
+		AA000007000000000000001 /* ClickResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100007000000000000001 /* ClickResponse.swift */; };
+		AA000008000000000000001 /* VoteResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100008000000000000001 /* VoteResponse.swift */; };
+		AA000009000000000000001 /* ServerStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009000000000000001 /* ServerStats.swift */; };
+		AA000010000000000000001 /* FavoriteStation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100010000000000000001 /* FavoriteStation.swift */; };
+		AA000011000000000000001 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100011000000000000001 /* HistoryEntry.swift */; };
+		AA000012000000000000001 /* ServerDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100012000000000000001 /* ServerDiscoveryService.swift */; };
+		AA000013000000000000001 /* RadioBrowserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100013000000000000001 /* RadioBrowserService.swift */; };
+		AA000014000000000000001 /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100014000000000000001 /* AudioPlayerService.swift */; };
+		AA000015000000000000001 /* NowPlayingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100015000000000000001 /* NowPlayingService.swift */; };
+		AA000016000000000000001 /* ImageCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100016000000000000001 /* ImageCacheService.swift */; };
+		AA000017000000000000001 /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100017000000000000001 /* DiscoverViewModel.swift */; };
+		AA000018000000000000001 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100018000000000000001 /* SearchViewModel.swift */; };
+		AA000019000000000000001 /* BrowseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100019000000000000001 /* BrowseViewModel.swift */; };
+		AA000020000000000000001 /* StationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100020000000000000001 /* StationListViewModel.swift */; };
+		AA000021000000000000001 /* PlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100021000000000000001 /* PlayerViewModel.swift */; };
+		AA000022000000000000001 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100022000000000000001 /* FavoritesViewModel.swift */; };
+		AA000023000000000000001 /* HistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100023000000000000001 /* HistoryViewModel.swift */; };
+		AA000024000000000000001 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100024000000000000001 /* RootTabView.swift */; };
+		AA000025000000000000001 /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100025000000000000001 /* DiscoverView.swift */; };
+		AA000026000000000000001 /* StationCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100026000000000000001 /* StationCarouselView.swift */; };
+		AA000027000000000000001 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100027000000000000001 /* SearchView.swift */; };
+		AA000028000000000000001 /* SearchFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100028000000000000001 /* SearchFiltersView.swift */; };
+		AA000029000000000000001 /* BrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100029000000000000001 /* BrowseView.swift */; };
+		AA000030000000000000001 /* CountryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100030000000000000001 /* CountryListView.swift */; };
+		AA000031000000000000001 /* LanguageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100031000000000000001 /* LanguageListView.swift */; };
+		AA000032000000000000001 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100032000000000000001 /* TagListView.swift */; };
+		AA000033000000000000001 /* StationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100033000000000000001 /* StationListView.swift */; };
+		AA000034000000000000001 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100034000000000000001 /* FavoritesView.swift */; };
+		AA000035000000000000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100035000000000000001 /* HistoryView.swift */; };
+		AA000036000000000000001 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100036000000000000001 /* MiniPlayerView.swift */; };
+		AA000037000000000000001 /* FullPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100037000000000000001 /* FullPlayerView.swift */; };
+		AA000038000000000000001 /* PlayerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100038000000000000001 /* PlayerControlsView.swift */; };
+		AA000039000000000000001 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100039000000000000001 /* AirPlayButton.swift */; };
+		AA000040000000000000001 /* StationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100040000000000000001 /* StationDetailView.swift */; };
+		AA000041000000000000001 /* StationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100041000000000000001 /* StationRowView.swift */; };
+		AA000042000000000000001 /* StationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100042000000000000001 /* StationCardView.swift */; };
+		AA000043000000000000001 /* FaviconImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043000000000000001 /* FaviconImageView.swift */; };
+		AA000044000000000000001 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100044000000000000001 /* ErrorView.swift */; };
+		AA000045000000000000001 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045000000000000001 /* LoadingView.swift */; };
+		AA000046000000000000001 /* TagChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100046000000000000001 /* TagChipView.swift */; };
+		AA000047000000000000001 /* String+CountryFlag.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100047000000000000001 /* String+CountryFlag.swift */; };
+		AA000048000000000000001 /* URL+RadioBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100048000000000000001 /* URL+RadioBrowser.swift */; };
+		AA000049000000000000001 /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100049000000000000001 /* SwiftData.framework */; };
+		AA000050000000000000001 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100050000000000000001 /* MediaPlayer.framework */; };
+		AA000051000000000000001 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100051000000000000001 /* AVFoundation.framework */; };
+		AA000052000000000000001 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100052000000000000001 /* Network.framework */; };
+		AA000053000000000000001 /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100053000000000000001 /* CryptoKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA100001000000000000001 /* RadioLibreApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioLibreApp.swift; sourceTree = "<group>"; };
+		AA100001000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA100002000000000000001 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		AA100003000000000000001 /* StationDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationDTO.swift; sourceTree = "<group>"; };
+		AA100004000000000000001 /* Country.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Country.swift; sourceTree = "<group>"; };
+		AA100005000000000000001 /* Language.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Language.swift; sourceTree = "<group>"; };
+		AA100006000000000000001 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
+		AA100007000000000000001 /* ClickResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickResponse.swift; sourceTree = "<group>"; };
+		AA100008000000000000001 /* VoteResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteResponse.swift; sourceTree = "<group>"; };
+		AA100009000000000000001 /* ServerStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerStats.swift; sourceTree = "<group>"; };
+		AA100010000000000000001 /* FavoriteStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStation.swift; sourceTree = "<group>"; };
+		AA100011000000000000001 /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
+		AA100012000000000000001 /* ServerDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDiscoveryService.swift; sourceTree = "<group>"; };
+		AA100013000000000000001 /* RadioBrowserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioBrowserService.swift; sourceTree = "<group>"; };
+		AA100014000000000000001 /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
+		AA100015000000000000001 /* NowPlayingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingService.swift; sourceTree = "<group>"; };
+		AA100016000000000000001 /* ImageCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheService.swift; sourceTree = "<group>"; };
+		AA100017000000000000001 /* DiscoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverViewModel.swift; sourceTree = "<group>"; };
+		AA100018000000000000001 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		AA100019000000000000001 /* BrowseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseViewModel.swift; sourceTree = "<group>"; };
+		AA100020000000000000001 /* StationListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationListViewModel.swift; sourceTree = "<group>"; };
+		AA100021000000000000001 /* PlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewModel.swift; sourceTree = "<group>"; };
+		AA100022000000000000001 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
+		AA100023000000000000001 /* HistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewModel.swift; sourceTree = "<group>"; };
+		AA100024000000000000001 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		AA100025000000000000001 /* DiscoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverView.swift; sourceTree = "<group>"; };
+		AA100026000000000000001 /* StationCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationCarouselView.swift; sourceTree = "<group>"; };
+		AA100027000000000000001 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		AA100028000000000000001 /* SearchFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFiltersView.swift; sourceTree = "<group>"; };
+		AA100029000000000000001 /* BrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseView.swift; sourceTree = "<group>"; };
+		AA100030000000000000001 /* CountryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryListView.swift; sourceTree = "<group>"; };
+		AA100031000000000000001 /* LanguageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageListView.swift; sourceTree = "<group>"; };
+		AA100032000000000000001 /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
+		AA100033000000000000001 /* StationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationListView.swift; sourceTree = "<group>"; };
+		AA100034000000000000001 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		AA100035000000000000001 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		AA100036000000000000001 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
+		AA100037000000000000001 /* FullPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullPlayerView.swift; sourceTree = "<group>"; };
+		AA100038000000000000001 /* PlayerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControlsView.swift; sourceTree = "<group>"; };
+		AA100039000000000000001 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
+		AA100040000000000000001 /* StationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationDetailView.swift; sourceTree = "<group>"; };
+		AA100041000000000000001 /* StationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationRowView.swift; sourceTree = "<group>"; };
+		AA100042000000000000001 /* StationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationCardView.swift; sourceTree = "<group>"; };
+		AA100043000000000000001 /* FaviconImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconImageView.swift; sourceTree = "<group>"; };
+		AA100044000000000000001 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		AA100045000000000000001 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		AA100046000000000000001 /* TagChipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagChipView.swift; sourceTree = "<group>"; };
+		AA100047000000000000001 /* String+CountryFlag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CountryFlag.swift"; sourceTree = "<group>"; };
+		AA100048000000000000001 /* URL+RadioBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+RadioBrowser.swift"; sourceTree = "<group>"; };
+		AA100049000000000000001 /* SwiftData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftData.framework; path = System/Library/Frameworks/SwiftData.framework; sourceTree = SDKROOT; };
+		AA100050000000000000001 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		AA100051000000000000001 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		AA100052000000000000001 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
+		AA100053000000000000001 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
+		AAPROD00000000000000001 /* RadioLibre.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RadioLibre.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AABP000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000049000000000000001 /* SwiftData.framework in Frameworks */,
+				AA000050000000000000001 /* MediaPlayer.framework in Frameworks */,
+				AA000051000000000000001 /* AVFoundation.framework in Frameworks */,
+				AA000052000000000000001 /* Network.framework in Frameworks */,
+				AA000053000000000000001 /* CryptoKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AAGRP000000000000000001 /* RadioLibre */ = {
+			isa = PBXGroup;
+			children = (
+				AAGRP000000000000000002 /* RadioLibre */,
+				AAGRP000000000000000099 /* Frameworks */,
+				AAGRP000000000000000100 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000002 /* RadioLibre */ = {
+			isa = PBXGroup;
+			children = (
+				AAGRP000000000000000010 /* App */,
+				AAGRP000000000000000020 /* Models */,
+				AAGRP000000000000000030 /* Services */,
+				AAGRP000000000000000040 /* ViewModels */,
+				AAGRP000000000000000050 /* Views */,
+				AAGRP000000000000000090 /* Extensions */,
+			);
+			path = RadioLibre;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000010 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AA100001000000000000001 /* RadioLibreApp.swift */,
+				AA100001000000000000002 /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000020 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA100002000000000000001 /* AppError.swift */,
+				AA100003000000000000001 /* StationDTO.swift */,
+				AA100004000000000000001 /* Country.swift */,
+				AA100005000000000000001 /* Language.swift */,
+				AA100006000000000000001 /* Tag.swift */,
+				AA100007000000000000001 /* ClickResponse.swift */,
+				AA100008000000000000001 /* VoteResponse.swift */,
+				AA100009000000000000001 /* ServerStats.swift */,
+				AA100010000000000000001 /* FavoriteStation.swift */,
+				AA100011000000000000001 /* HistoryEntry.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000030 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA100012000000000000001 /* ServerDiscoveryService.swift */,
+				AA100013000000000000001 /* RadioBrowserService.swift */,
+				AA100014000000000000001 /* AudioPlayerService.swift */,
+				AA100015000000000000001 /* NowPlayingService.swift */,
+				AA100016000000000000001 /* ImageCacheService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000040 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA100017000000000000001 /* DiscoverViewModel.swift */,
+				AA100018000000000000001 /* SearchViewModel.swift */,
+				AA100019000000000000001 /* BrowseViewModel.swift */,
+				AA100020000000000000001 /* StationListViewModel.swift */,
+				AA100021000000000000001 /* PlayerViewModel.swift */,
+				AA100022000000000000001 /* FavoritesViewModel.swift */,
+				AA100023000000000000001 /* HistoryViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000050 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA100024000000000000001 /* RootTabView.swift */,
+				AAGRP000000000000000051 /* Discover */,
+				AAGRP000000000000000052 /* Search */,
+				AAGRP000000000000000053 /* Browse */,
+				AAGRP000000000000000054 /* Favorites */,
+				AAGRP000000000000000055 /* History */,
+				AAGRP000000000000000056 /* Player */,
+				AAGRP000000000000000057 /* StationDetail */,
+				AAGRP000000000000000058 /* Common */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000051 /* Discover */ = {
+			isa = PBXGroup;
+			children = (
+				AA100025000000000000001 /* DiscoverView.swift */,
+				AA100026000000000000001 /* StationCarouselView.swift */,
+			);
+			path = Discover;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000052 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				AA100027000000000000001 /* SearchView.swift */,
+				AA100028000000000000001 /* SearchFiltersView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000053 /* Browse */ = {
+			isa = PBXGroup;
+			children = (
+				AA100029000000000000001 /* BrowseView.swift */,
+				AA100030000000000000001 /* CountryListView.swift */,
+				AA100031000000000000001 /* LanguageListView.swift */,
+				AA100032000000000000001 /* TagListView.swift */,
+				AA100033000000000000001 /* StationListView.swift */,
+			);
+			path = Browse;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000054 /* Favorites */ = {
+			isa = PBXGroup;
+			children = (
+				AA100034000000000000001 /* FavoritesView.swift */,
+			);
+			path = Favorites;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000055 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				AA100035000000000000001 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000056 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				AA100036000000000000001 /* MiniPlayerView.swift */,
+				AA100037000000000000001 /* FullPlayerView.swift */,
+				AA100038000000000000001 /* PlayerControlsView.swift */,
+				AA100039000000000000001 /* AirPlayButton.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000057 /* StationDetail */ = {
+			isa = PBXGroup;
+			children = (
+				AA100040000000000000001 /* StationDetailView.swift */,
+			);
+			path = StationDetail;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000058 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				AA100041000000000000001 /* StationRowView.swift */,
+				AA100042000000000000001 /* StationCardView.swift */,
+				AA100043000000000000001 /* FaviconImageView.swift */,
+				AA100044000000000000001 /* ErrorView.swift */,
+				AA100045000000000000001 /* LoadingView.swift */,
+				AA100046000000000000001 /* TagChipView.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000090 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				AA100047000000000000001 /* String+CountryFlag.swift */,
+				AA100048000000000000001 /* URL+RadioBrowser.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000099 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA100049000000000000001 /* SwiftData.framework */,
+				AA100050000000000000001 /* MediaPlayer.framework */,
+				AA100051000000000000001 /* AVFoundation.framework */,
+				AA100052000000000000001 /* Network.framework */,
+				AA100053000000000000001 /* CryptoKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AAGRP000000000000000100 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AAPROD00000000000000001 /* RadioLibre.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AATGT000000000000000001 /* RadioLibre */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AACFL000000000000000002 /* Build configuration list for PBXNativeTarget "RadioLibre" */;
+			buildPhases = (
+				AABP000000000000000000 /* Sources */,
+				AABP000000000000000001 /* Frameworks */,
+				AABP000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RadioLibre;
+			productName = RadioLibre;
+			productReference = AAPROD00000000000000001 /* RadioLibre.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AAPRJ000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AATGT000000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AACFL000000000000000001 /* Build configuration list for PBXProject "RadioLibre" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AAGRP000000000000000001 /* RadioLibre */;
+			productRefGroup = AAGRP000000000000000100 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AATGT000000000000000001 /* RadioLibre */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AABP000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AABP000000000000000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001000000000000001 /* RadioLibreApp.swift in Sources */,
+				AA000002000000000000001 /* AppError.swift in Sources */,
+				AA000003000000000000001 /* StationDTO.swift in Sources */,
+				AA000004000000000000001 /* Country.swift in Sources */,
+				AA000005000000000000001 /* Language.swift in Sources */,
+				AA000006000000000000001 /* Tag.swift in Sources */,
+				AA000007000000000000001 /* ClickResponse.swift in Sources */,
+				AA000008000000000000001 /* VoteResponse.swift in Sources */,
+				AA000009000000000000001 /* ServerStats.swift in Sources */,
+				AA000010000000000000001 /* FavoriteStation.swift in Sources */,
+				AA000011000000000000001 /* HistoryEntry.swift in Sources */,
+				AA000012000000000000001 /* ServerDiscoveryService.swift in Sources */,
+				AA000013000000000000001 /* RadioBrowserService.swift in Sources */,
+				AA000014000000000000001 /* AudioPlayerService.swift in Sources */,
+				AA000015000000000000001 /* NowPlayingService.swift in Sources */,
+				AA000016000000000000001 /* ImageCacheService.swift in Sources */,
+				AA000017000000000000001 /* DiscoverViewModel.swift in Sources */,
+				AA000018000000000000001 /* SearchViewModel.swift in Sources */,
+				AA000019000000000000001 /* BrowseViewModel.swift in Sources */,
+				AA000020000000000000001 /* StationListViewModel.swift in Sources */,
+				AA000021000000000000001 /* PlayerViewModel.swift in Sources */,
+				AA000022000000000000001 /* FavoritesViewModel.swift in Sources */,
+				AA000023000000000000001 /* HistoryViewModel.swift in Sources */,
+				AA000024000000000000001 /* RootTabView.swift in Sources */,
+				AA000025000000000000001 /* DiscoverView.swift in Sources */,
+				AA000026000000000000001 /* StationCarouselView.swift in Sources */,
+				AA000027000000000000001 /* SearchView.swift in Sources */,
+				AA000028000000000000001 /* SearchFiltersView.swift in Sources */,
+				AA000029000000000000001 /* BrowseView.swift in Sources */,
+				AA000030000000000000001 /* CountryListView.swift in Sources */,
+				AA000031000000000000001 /* LanguageListView.swift in Sources */,
+				AA000032000000000000001 /* TagListView.swift in Sources */,
+				AA000033000000000000001 /* StationListView.swift in Sources */,
+				AA000034000000000000001 /* FavoritesView.swift in Sources */,
+				AA000035000000000000001 /* HistoryView.swift in Sources */,
+				AA000036000000000000001 /* MiniPlayerView.swift in Sources */,
+				AA000037000000000000001 /* FullPlayerView.swift in Sources */,
+				AA000038000000000000001 /* PlayerControlsView.swift in Sources */,
+				AA000039000000000000001 /* AirPlayButton.swift in Sources */,
+				AA000040000000000000001 /* StationDetailView.swift in Sources */,
+				AA000041000000000000001 /* StationRowView.swift in Sources */,
+				AA000042000000000000001 /* StationCardView.swift in Sources */,
+				AA000043000000000000001 /* FaviconImageView.swift in Sources */,
+				AA000044000000000000001 /* ErrorView.swift in Sources */,
+				AA000045000000000000001 /* LoadingView.swift in Sources */,
+				AA000046000000000000001 /* TagChipView.swift in Sources */,
+				AA000047000000000000001 /* String+CountryFlag.swift in Sources */,
+				AA000048000000000000001 /* URL+RadioBrowser.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AAXBC000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		AAXBC000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AAXBC000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RadioLibre/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = info.radiolibre.RadioLibre;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AAXBC000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RadioLibre/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = info.radiolibre.RadioLibre;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AACFL000000000000000001 /* Build configuration list for PBXProject "RadioLibre" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAXBC000000000000000001 /* Debug */,
+				AAXBC000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AACFL000000000000000002 /* Build configuration list for PBXNativeTarget "RadioLibre" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAXBC000000000000000003 /* Debug */,
+				AAXBC000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = AAPRJ000000000000000001 /* Project object */;
+}
