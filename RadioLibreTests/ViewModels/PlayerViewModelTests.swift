@@ -163,6 +163,20 @@ final class PlayerViewModelTests: XCTestCase {
         XCTAssertNotNil(vm.errorMessage)
     }
 
+    // MARK: - History Recording
+
+    func testPlayRecordsHistory() async throws {
+        let station = TestFixtures.makeStation(uuid: "history-test", name: "History Station")
+        vm.play(station: station)
+
+        // Wait for the fire-and-forget Task inside play() to complete
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        let entries = await historyService.allEntries()
+        XCTAssertEqual(entries.count, 1)
+        XCTAssertEqual(entries[0].stationuuid, "history-test")
+    }
+
     // MARK: - State Forwarding
 
     func testStateMatchesAudioService() {

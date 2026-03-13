@@ -1141,6 +1141,9 @@ struct RadioLibreApp: App {
 - `AVAudioSession` category uses `.allowBluetoothA2DP` (not the deprecated `.allowBluetooth`).
 - `MPRemoteCommandCenter.nextTrackCommand` and `.previousTrackCommand` are registered but disabled — they will be enabled in Phase 4 when favorites are available.
 - MiniPlayerView uses a placeholder full-player sheet — replaced in Phase 5.
+- **Testing AVAudioSession notifications:** Interruption and route-change handlers are `@objc private` methods registered via `NotificationCenter.default.addObserver(_:selector:name:object:)` with `object: AVAudioSession.sharedInstance()`. Tests trigger them by posting real notifications with the same `object` and correct `userInfo` keys (`AVAudioSessionInterruptionTypeKey`, `AVAudioSessionInterruptionOptionKey`, `AVAudioSessionRouteChangeReasonKey`). Since tests run on `@MainActor` (main thread), the selector-based dispatch executes synchronously on post.
+- **Testing NowPlayingService:** `MPNowPlayingInfoCenter.default()` and `MPRemoteCommandCenter.shared()` are system singletons accessible in the test host app. Tests verify `nowPlayingInfo` dictionary contents (title, artist, album, live stream flag, playback rate) and command `isEnabled` state directly. `tearDown` clears `nowPlayingInfo` to avoid test pollution.
+- **Testing PlayerViewModel history recording:** `vm.play()` fires a detached `Task { await historyService.recordPlay() }`. Tests use `try await Task.sleep(nanoseconds: 100_000_000)` (100ms) to yield the main actor and let the fire-and-forget task complete before asserting on `historyService.allEntries()`.
 
 ### Phase 3: Search & Browse
 **Goal:** Full station discovery through search, browse by category, and drill-down lists.

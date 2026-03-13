@@ -238,4 +238,88 @@ final class AudioPlayerServiceTests: XCTestCase {
         service.resume()
         XCTAssertEqual(service.state, .idle)
     }
+
+    // MARK: - Interruption Handling
+
+    func testInterruptionBeganPauses() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        NotificationCenter.default.post(
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            userInfo: [
+                AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue
+            ]
+        )
+
+        XCTAssertEqual(service.state, .paused(station: station))
+    }
+
+    func testInterruptionEndedWithShouldResumeResumes() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.pause()
+
+        NotificationCenter.default.post(
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            userInfo: [
+                AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue,
+                AVAudioSessionInterruptionOptionKey: AVAudioSession.InterruptionOptions.shouldResume.rawValue
+            ]
+        )
+
+        // resume() calls play(), which sets state to .loading
+        XCTAssertEqual(service.state, .loading(station: station))
+    }
+
+    func testInterruptionEndedWithoutShouldResumeStaysPaused() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.pause()
+
+        NotificationCenter.default.post(
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            userInfo: [
+                AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue,
+                AVAudioSessionInterruptionOptionKey: UInt(0)
+            ]
+        )
+
+        XCTAssertEqual(service.state, .paused(station: station))
+    }
+
+    // MARK: - Route Change Handling
+
+    func testRouteChangeOldDeviceUnavailablePauses() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        NotificationCenter.default.post(
+            name: AVAudioSession.routeChangeNotification,
+            object: AVAudioSession.sharedInstance(),
+            userInfo: [
+                AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+            ]
+        )
+
+        XCTAssertEqual(service.state, .paused(station: station))
+    }
+
+    func testRouteChangeNewDeviceDoesNotPause() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        NotificationCenter.default.post(
+            name: AVAudioSession.routeChangeNotification,
+            object: AVAudioSession.sharedInstance(),
+            userInfo: [
+                AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+            ]
+        )
+
+        XCTAssertEqual(service.state, .loading(station: station))
+    }
 }
