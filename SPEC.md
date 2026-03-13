@@ -85,10 +85,10 @@ Rules:
 | Tab | Icon | Screen |
 |---|---|---|
 | Discover | antenna.radiowaves.left.and.right | Home with curated sections |
+| Recent | clock | Recently played stations |
 | Search | magnifyingglass | Search with filters |
 | Browse | list.bullet | Countries / Languages / Tags |
 | Favorites | heart.fill | Saved stations |
-| History | clock | Play history |
 
 A mini player bar sits above the tab bar whenever a station is loaded.
 
@@ -206,17 +206,17 @@ Favorites are accessible everywhere:
 
 ---
 
-## History
+## Recent (History)
 
-Automatic record of played stations.
+Automatic record of played stations, shown in the **Recent** tab.
 
 - Recorded every time a station starts playing (subject to dedup/limit rules above)
 - List sorted by most recent first
-- Each row shows station info + relative timestamp ("2 hours ago")
+- Each row shows station info + relative timestamp ("2 hr. ago")
 - Tapping a row plays that station
-- Toolbar button: "Clear All" (with confirmation)
-- Empty state: "No listening history"
-- Persisted locally, survives app restart
+- Toolbar button: "Clear All" (with confirmation alert)
+- Empty state: clock icon + "No listening history"
+- Persisted locally via UserDefaults, survives app restart
 
 ---
 

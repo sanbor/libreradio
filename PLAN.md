@@ -277,7 +277,7 @@ RadioLibre/
 │   │   ├── VoteResponse.swift                  # Codable: /json/vote response
 │   │   ├── ServerStats.swift                   # Codable: /json/stats response
 │   │   ├── FavoriteStation.swift               # SwiftData @Model
-│   │   ├── HistoryEntry.swift                  # SwiftData @Model
+│   │   ├── HistoryEntry.swift                  # Codable struct, UserDefaults persistence
 │   │   └── AppError.swift                      # Typed error enum
 │   │
 │   ├── Services/
@@ -285,6 +285,7 @@ RadioLibre/
 │   │   ├── RadioBrowserService.swift            # All API calls (actor)
 │   │   ├── AudioPlayerService.swift             # AVPlayer wrapper, playback state machine
 │   │   ├── NowPlayingService.swift              # MPNowPlayingInfoCenter + MPRemoteCommandCenter
+│   │   ├── HistoryService.swift                 # Actor: play history persistence + dedup + limit
 │   │   └── ImageCacheService.swift              # NSCache + disk cache for favicons
 │   │
 │   ├── ViewModels/
@@ -294,10 +295,10 @@ RadioLibre/
 │   │   ├── StationListViewModel.swift           # Reusable: filtered station list + pagination
 │   │   ├── PlayerViewModel.swift                # Play/pause/stop, current station, history recording
 │   │   ├── FavoritesViewModel.swift             # Add/remove/reorder favorites
-│   │   └── HistoryViewModel.swift               # History list, clear all, record plays
+│   │   └── RecentStationsViewModel.swift        # Recent stations list, clear all
 │   │
 │   ├── Views/
-│   │   ├── RootTabView.swift                    # TabView: Discover, Search, Browse, Favorites, History
+│   │   ├── RootTabView.swift                    # TabView: Discover, Recent, Search, Browse, Favorites
 │   │   │
 │   │   ├── Discover/
 │   │   │   ├── DiscoverView.swift               # Home screen: local, top click, top vote, recent, trending
@@ -317,8 +318,8 @@ RadioLibre/
 │   │   ├── Favorites/
 │   │   │   └── FavoritesView.swift              # @Query list, drag-to-reorder, swipe-to-delete
 │   │   │
-│   │   ├── History/
-│   │   │   └── HistoryView.swift                # @Query list, relative timestamps, clear all
+│   │   ├── Recent/
+│   │   │   └── RecentStationsView.swift         # Recent stations list, relative timestamps, clear all
 │   │   │
 │   │   ├── Player/
 │   │   │   ├── MiniPlayerView.swift             # Sticky bottom bar: favicon, name, play/pause
@@ -1162,18 +1163,26 @@ struct RadioLibreApp: App {
 **Goal:** Favorites and history persist across app restarts.
 
 1. `FavoriteStation.swift` SwiftData model
-2. `HistoryEntry.swift` SwiftData model
-3. Configure `modelContainer` in RadioLibreApp
+2. ~~`HistoryEntry.swift` SwiftData model~~ → **Done (pre-Phase 4):** implemented as `Codable` struct with `UserDefaults` persistence via `HistoryService` actor. Can migrate to SwiftData later if needed.
+3. Configure `modelContainer` in RadioLibreApp (for FavoriteStation only)
 4. `FavoritesViewModel.swift` (add/remove/reorder/sync)
 5. `FavoritesView.swift` with `@Query`, drag-to-reorder, swipe-to-delete
-6. `HistoryViewModel.swift` (record plays, clear all, enforce limit)
-7. `HistoryView.swift` with `@Query`, relative timestamps
+6. ~~`HistoryViewModel.swift`~~ → **Done (pre-Phase 4):** `RecentStationsViewModel.swift`
+7. ~~`HistoryView.swift`~~ → **Done (pre-Phase 4):** `RecentStationsView.swift` with relative timestamps, clear all
 8. Add swipe-to-favorite on `StationRowView`
 9. Add favorite heart button to `FullPlayerView`
-10. Record history entries in `PlayerViewModel.play()`
+10. ~~Record history entries in `PlayerViewModel.play()`~~ → **Done (pre-Phase 4)**
 11. Auto-vote on favorite (RadioDroid behavior)
 
 **Verify:** Favorites persist, can reorder, history accumulates with deduplication, survives app kill.
+
+**Implementation notes (Recent Stations — pre-Phase 4):**
+- **UserDefaults vs SwiftData for history:** Used `Codable` struct + `UserDefaults` instead of SwiftData `@Model` to avoid introducing SwiftData `modelContainer` before favorites are ready. History entries are small (max 50) and serialization via `JSONEncoder`/`JSONDecoder` is fast. Can migrate to SwiftData when favorites are implemented if desired.
+- **HistoryService is an `actor`** (not `@MainActor`) since it does no UI work — consistent with `ServerDiscoveryService` pattern.
+- **`HistoryEntry.toStationDTO()`** reconstructs a minimal `StationDTO` from history data so the player can replay from history entries without an API call. Fields not stored in history (tags, votes, etc.) are nil.
+- **`Date.relativeDescription`** extension uses `RelativeDateTimeFormatter` with `.short` style (e.g. "2 hr. ago").
+- **`await` inside `XCTAssertEqual` autoclosures causes compiler errors** — must extract the async result to a local variable first, then assert on it.
+- **`RecentStationsView` uses its own `RecentStationRow`** (private struct) instead of `StationRowView` because history rows need relative timestamps instead of tags, and the data source is `HistoryEntry` not `StationDTO`.
 
 ### Phase 5: Player UI & Image Cache
 **Goal:** Full player sheet, AirPlay, station detail, favicon caching.

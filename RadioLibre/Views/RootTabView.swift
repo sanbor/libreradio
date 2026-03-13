@@ -9,6 +9,11 @@ struct RootTabView: View {
                 .tabItem {
                     Label("Discover", systemImage: "antenna.radiowaves.left.and.right")
                 }
+
+            RecentStationsView()
+                .tabItem {
+                    Label("Recent", systemImage: "clock")
+                }
         }
         .safeAreaInset(edge: .bottom) {
             MiniPlayerView()

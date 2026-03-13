@@ -5,15 +5,18 @@ import Combine
 final class PlayerViewModel: ObservableObject {
     let audioService: AudioPlayerService
     private let radioBrowserService: RadioBrowserService
+    private let historyService: HistoryService
     private var cancellable: AnyCancellable?
 
     @MainActor
     init(
         audioService: AudioPlayerService,
-        radioBrowserService: RadioBrowserService = .shared
+        radioBrowserService: RadioBrowserService = .shared,
+        historyService: HistoryService = .shared
     ) {
         self.audioService = audioService
         self.radioBrowserService = radioBrowserService
+        self.historyService = historyService
 
         // Forward audioService state changes to trigger objectWillChange
         cancellable = audioService.objectWillChange.sink { [weak self] _ in
@@ -50,6 +53,9 @@ final class PlayerViewModel: ObservableObject {
 
     func play(station: StationDTO) {
         audioService.play(station: station)
+        Task {
+            await historyService.recordPlay(station: station)
+        }
     }
 
     func togglePlayPause() {
