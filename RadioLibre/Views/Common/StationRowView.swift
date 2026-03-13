@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StationRowView: View {
     let station: StationDTO
+    var isConnecting: Bool = false
     var onTap: (() -> Void)?
 
     var body: some View {
@@ -24,7 +25,15 @@ struct StationRowView: View {
                         .lineLimit(1)
                         .foregroundStyle(.primary)
 
-                    if !station.tagList.isEmpty {
+                    if isConnecting {
+                        HStack(spacing: 4) {
+                            ProgressView()
+                                .controlSize(.mini)
+                            Text("Connecting...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if !station.tagList.isEmpty {
                         Text(station.tagList.prefix(3).joined(separator: ", "))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -51,6 +60,7 @@ struct StationRowView: View {
                 }
             }
             .padding(.vertical, 4)
+            .opacity(isConnecting ? 0.6 : 1.0)
         }
         .buttonStyle(.plain)
     }

@@ -262,6 +262,8 @@ Exposed as a 0.0–1.0 slider, controls player volume directly.
 | Interruption ended with "should resume" | Resume |
 | Headphones disconnected | Pause |
 
+**Implementation note:** Interruptions are observed via `AVAudioSession.interruptionNotification`. Route changes via `AVAudioSession.routeChangeNotification`, checking for `.oldDeviceUnavailable` reason. Both handlers run on `@MainActor` since `AudioPlayerService` is `@MainActor`-isolated.
+
 ### Background Audio
 
 Playback continues when the app is backgrounded. Requires `UIBackgroundModes: audio` in Info.plist.
@@ -303,7 +305,7 @@ When playback stops, clear all info.
 
 Persistent bar above the tab bar. Only visible when a station is loaded.
 
-Shows: favicon (40×40), station name, codec + bitrate, play/pause button, stop button. Spinner when buffering. Translucent background.
+Shows: favicon (40×40), station name, codec + bitrate, play/pause button, stop button. Spinner replaces play/pause button when buffering. Subtitle shows "Connecting..." when loading, error message (in red) on error, codec + bitrate otherwise. Translucent background.
 
 Tapping anywhere (except buttons) opens the full player.
 
@@ -337,6 +339,8 @@ Interactions:
 - Tap → play station
 - Leading swipe → toggle favorite
 - Context menu: Play, Add/Remove Favorite, Vote, Copy Stream URL, Share, Visit Website
+
+Connecting state: When the tapped station is loading, the row dims to 60% opacity and the tag subtitle is replaced with a mini spinner + "Connecting..." label.
 
 ---
 

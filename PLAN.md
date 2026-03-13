@@ -1133,6 +1133,14 @@ struct RadioLibreApp: App {
 
 **Verify:** Can play any station, audio continues in background, lock screen shows station name and controls.
 
+**Implementation notes (Phase 2):**
+- `AudioPlayerService` uses `@MainActor` (not `actor`) because `AVPlayer` requires main-thread access. Uses KVO on `player.timeControlStatus` and `playerItem.status` for state transitions.
+- `NowPlayingService` uses a `setAudioService(_:)` method (called at app startup) to break the circular dependency between audio and now-playing services. Remote command callbacks use `[weak self]` to avoid retain cycles.
+- `PlayerViewModel` forwards `audioService.objectWillChange` via a Combine sink to trigger SwiftUI updates. This is the only use of Combine in the project — it bridges `ObservableObject` publishers between the service and view model.
+- `AVAudioSession` category uses `.allowBluetoothA2DP` (not the deprecated `.allowBluetooth`).
+- `MPRemoteCommandCenter.nextTrackCommand` and `.previousTrackCommand` are registered but disabled — they will be enabled in Phase 4 when favorites are available.
+- MiniPlayerView uses a placeholder full-player sheet — replaced in Phase 5.
+
 ### Phase 3: Search & Browse
 **Goal:** Full station discovery through search, browse by category, and drill-down lists.
 

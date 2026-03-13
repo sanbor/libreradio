@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiscoverView: View {
     @StateObject private var viewModel = DiscoverViewModel()
+    @EnvironmentObject private var playerVM: PlayerViewModel
 
     var body: some View {
         NavigationStack {
@@ -56,8 +57,9 @@ struct DiscoverView: View {
     private func stationSection(title: String, stations: [StationDTO]) -> some View {
         Section(title) {
             ForEach(stations) { station in
-                StationRowView(station: station) {
-                    // Playback wired in Phase 2
+                let isConnecting = playerVM.isLoading && playerVM.currentStation?.stationuuid == station.stationuuid
+                StationRowView(station: station, isConnecting: isConnecting) {
+                    playerVM.play(station: station)
                 }
             }
         }
