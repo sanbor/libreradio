@@ -1,4 +1,4 @@
-![RadioLibre App Icon](RadioLibre/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png)
+<img src="RadioLibre/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" width="200" />
 
 # RadioLibre
 
