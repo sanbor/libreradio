@@ -13,9 +13,11 @@ final class BrowseViewModel: ObservableObject {
     @Published var tagsError: AppError?
 
     private let service: RadioBrowserService
+    private let cache: StationCacheService
 
-    init(service: RadioBrowserService = .shared) {
+    init(service: RadioBrowserService = .shared, cache: StationCacheService = .shared) {
         self.service = service
+        self.cache = cache
     }
 
     func loadCountries() async {
@@ -23,13 +25,20 @@ final class BrowseViewModel: ObservableObject {
         isLoadingCountries = true
         countriesError = nil
 
+        let cached: [Country]? = await cache.load(key: StationCacheService.browseCountries)
+        let hasCache = cached != nil
+        if let cached = cached {
+            countries = cached
+        }
+
         do {
             let result = try await service.fetchCountries()
-            countries = result.sorted { $0.stationcount > $1.stationcount }
+            countries = result.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+            await cache.save(key: StationCacheService.browseCountries, value: countries)
         } catch let appError as AppError {
-            countriesError = appError
+            if !hasCache { countriesError = appError }
         } catch {
-            countriesError = .networkUnavailable
+            if !hasCache { countriesError = .networkUnavailable }
         }
 
         isLoadingCountries = false
@@ -40,13 +49,20 @@ final class BrowseViewModel: ObservableObject {
         isLoadingLanguages = true
         languagesError = nil
 
+        let cached: [Language]? = await cache.load(key: StationCacheService.browseLanguages)
+        let hasCache = cached != nil
+        if let cached = cached {
+            languages = cached
+        }
+
         do {
             let result = try await service.fetchLanguages()
             languages = result.sorted { $0.stationcount > $1.stationcount }
+            await cache.save(key: StationCacheService.browseLanguages, value: languages)
         } catch let appError as AppError {
-            languagesError = appError
+            if !hasCache { languagesError = appError }
         } catch {
-            languagesError = .networkUnavailable
+            if !hasCache { languagesError = .networkUnavailable }
         }
 
         isLoadingLanguages = false
@@ -57,13 +73,20 @@ final class BrowseViewModel: ObservableObject {
         isLoadingTags = true
         tagsError = nil
 
+        let cached: [Tag]? = await cache.load(key: StationCacheService.browseTags)
+        let hasCache = cached != nil
+        if let cached = cached {
+            tags = cached
+        }
+
         do {
             let result = try await service.fetchTags()
             tags = result.sorted { $0.stationcount > $1.stationcount }
+            await cache.save(key: StationCacheService.browseTags, value: tags)
         } catch let appError as AppError {
-            tagsError = appError
+            if !hasCache { tagsError = appError }
         } catch {
-            tagsError = .networkUnavailable
+            if !hasCache { tagsError = .networkUnavailable }
         }
 
         isLoadingTags = false

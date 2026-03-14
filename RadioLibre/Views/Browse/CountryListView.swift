@@ -26,19 +26,19 @@ struct CountryListView: View {
             return viewModel.countries
         }
         return viewModel.countries.filter {
-            $0.name.localizedCaseInsensitiveContains(searchText)
+            $0.displayName.localizedCaseInsensitiveContains(searchText)
         }
     }
 
     private var countryList: some View {
         List(filteredCountries) { country in
             NavigationLink {
-                StationListView(filter: .country(country.iso_3166_1), title: country.name)
+                StationListView(filter: .country(country.iso_3166_1), title: country.displayName)
             } label: {
                 HStack {
                     Text(getFlag(from: country.iso_3166_1))
                         .font(.title2)
-                    Text(country.name)
+                    Text(country.displayName)
                     Spacer()
                     Text("\(country.stationcount)")
                         .font(.caption)

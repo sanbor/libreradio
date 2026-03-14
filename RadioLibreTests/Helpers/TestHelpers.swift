@@ -72,6 +72,29 @@ enum TestFixtures {
         )
     }
 
+    static func makeCountry(
+        name: String = "Germany",
+        iso3166: String = "DE",
+        stationcount: Int = 500
+    ) -> Country {
+        Country(name: name, iso_3166_1: iso3166, stationcount: stationcount)
+    }
+
+    static func makeLanguage(
+        name: String = "english",
+        iso639: String? = "eng",
+        stationcount: Int = 10000
+    ) -> Language {
+        Language(name: name, iso_639: iso639, stationcount: stationcount)
+    }
+
+    static func makeTag(
+        name: String = "rock",
+        stationcount: Int = 5000
+    ) -> Tag {
+        Tag(name: name, stationcount: stationcount)
+    }
+
     static func makeMockSession() -> URLSession {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]

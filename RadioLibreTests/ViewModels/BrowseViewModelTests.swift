@@ -6,6 +6,8 @@ final class BrowseViewModelTests: XCTestCase {
 
     private var discovery: ServerDiscoveryService!
     private var service: RadioBrowserService!
+    private var suiteName: String!
+    private var cache: StationCacheService!
 
     override func setUp() async throws {
         discovery = ServerDiscoveryService()
@@ -13,10 +15,17 @@ final class BrowseViewModelTests: XCTestCase {
 
         let session = TestFixtures.makeMockSession()
         service = RadioBrowserService(discovery: discovery, session: session)
+
+        suiteName = "test.browse.\(UUID().uuidString)"
+        let testDefaults = UserDefaults(suiteName: suiteName)!
+        cache = StationCacheService(defaults: testDefaults)
     }
 
     override func tearDown() {
         MockURLProtocol.requestHandler = nil
+        if let suiteName = suiteName {
+            UserDefaults.standard.removePersistentDomain(forName: suiteName)
+        }
     }
 
     // MARK: - Countries
@@ -24,21 +33,21 @@ final class BrowseViewModelTests: XCTestCase {
     func testLoadCountriesSuccess() async {
         let json = """
         [
+            {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000},
             {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
-            {"name": "France", "iso_3166_1": "FR", "stationcount": 300},
-            {"name": "United States", "iso_3166_1": "US", "stationcount": 1000}
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
         ]
         """
         setMockResponse(json: json)
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadCountries()
 
         XCTAssertEqual(vm.countries.count, 3)
-        // Should be sorted by stationcount descending
-        XCTAssertEqual(vm.countries[0].name, "United States")
-        XCTAssertEqual(vm.countries[1].name, "Germany")
-        XCTAssertEqual(vm.countries[2].name, "France")
+        // Should be sorted alphabetically by displayName
+        XCTAssertEqual(vm.countries[0].displayName, "France")
+        XCTAssertEqual(vm.countries[1].displayName, "Germany")
+        XCTAssertEqual(vm.countries[2].displayName, "United States")
         XCTAssertFalse(vm.isLoadingCountries)
         XCTAssertNil(vm.countriesError)
     }
@@ -48,7 +57,7 @@ final class BrowseViewModelTests: XCTestCase {
             throw URLError(.notConnectedToInternet)
         }
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadCountries()
 
         XCTAssertTrue(vm.countries.isEmpty)
@@ -59,7 +68,7 @@ final class BrowseViewModelTests: XCTestCase {
     func testLoadCountriesGuardsConcurrency() async {
         setMockResponse(json: "[]")
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         vm.isLoadingCountries = true
 
         await vm.loadCountries()
@@ -78,7 +87,7 @@ final class BrowseViewModelTests: XCTestCase {
         """
         setMockResponse(json: json)
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadLanguages()
 
         XCTAssertEqual(vm.languages.count, 2)
@@ -93,7 +102,7 @@ final class BrowseViewModelTests: XCTestCase {
             throw URLError(.notConnectedToInternet)
         }
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadLanguages()
 
         XCTAssertTrue(vm.languages.isEmpty)
@@ -104,7 +113,7 @@ final class BrowseViewModelTests: XCTestCase {
     func testLoadLanguagesGuardsConcurrency() async {
         setMockResponse(json: "[]")
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         vm.isLoadingLanguages = true
 
         await vm.loadLanguages()
@@ -123,7 +132,7 @@ final class BrowseViewModelTests: XCTestCase {
         """
         setMockResponse(json: json)
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadTags()
 
         XCTAssertEqual(vm.tags.count, 3)
@@ -139,7 +148,7 @@ final class BrowseViewModelTests: XCTestCase {
             throw URLError(.notConnectedToInternet)
         }
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadTags()
 
         XCTAssertTrue(vm.tags.isEmpty)
@@ -150,7 +159,7 @@ final class BrowseViewModelTests: XCTestCase {
     func testLoadTagsGuardsConcurrency() async {
         setMockResponse(json: "[]")
 
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
         vm.isLoadingTags = true
 
         await vm.loadTags()
@@ -160,7 +169,7 @@ final class BrowseViewModelTests: XCTestCase {
     // MARK: - Initial State
 
     func testInitialState() {
-        let vm = BrowseViewModel(service: service)
+        let vm = BrowseViewModel(service: service, cache: cache)
 
         XCTAssertTrue(vm.countries.isEmpty)
         XCTAssertTrue(vm.languages.isEmpty)
@@ -171,6 +180,130 @@ final class BrowseViewModelTests: XCTestCase {
         XCTAssertNil(vm.countriesError)
         XCTAssertNil(vm.languagesError)
         XCTAssertNil(vm.tagsError)
+    }
+
+    // MARK: - Cache Tests
+
+    func testCachedCountriesShownOnNetworkFailure() async {
+        let countries = [
+            TestFixtures.makeCountry(name: "Germany", stationcount: 500),
+            TestFixtures.makeCountry(name: "France", stationcount: 300),
+        ]
+        await cache.save(key: StationCacheService.browseCountries, value: countries)
+
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadCountries()
+
+        XCTAssertEqual(vm.countries.count, 2)
+        XCTAssertEqual(vm.countries[0].name, "Germany")
+        XCTAssertNil(vm.countriesError)
+        XCTAssertFalse(vm.isLoadingCountries)
+    }
+
+    func testFreshCountriesReplaceCachedData() async {
+        let oldCountries = [TestFixtures.makeCountry(name: "Old Country")]
+        await cache.save(key: StationCacheService.browseCountries, value: oldCountries)
+
+        let json = """
+        [
+            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadCountries()
+
+        XCTAssertEqual(vm.countries.count, 2)
+        // Sorted alphabetically: France before Germany
+        XCTAssertEqual(vm.countries[0].displayName, "France")
+        XCTAssertEqual(vm.countries[1].displayName, "Germany")
+    }
+
+    func testCountriesCacheUpdatedAfterFetch() async {
+        let json = """
+        [
+            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadCountries()
+
+        let cached: [Country]? = await cache.load(key: StationCacheService.browseCountries)
+        XCTAssertNotNil(cached)
+        XCTAssertEqual(cached?.count, 1)
+        XCTAssertEqual(cached?[0].name, "Germany")
+    }
+
+    func testCachedLanguagesShownOnNetworkFailure() async {
+        let languages = [TestFixtures.makeLanguage(name: "english")]
+        await cache.save(key: StationCacheService.browseLanguages, value: languages)
+
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+
+        XCTAssertEqual(vm.languages.count, 1)
+        XCTAssertEqual(vm.languages[0].name, "english")
+        XCTAssertNil(vm.languagesError)
+    }
+
+    func testLanguagesCacheUpdatedAfterFetch() async {
+        let json = """
+        [
+            {"name": "english", "iso_639": "eng", "stationcount": 10000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+
+        let cached: [Language]? = await cache.load(key: StationCacheService.browseLanguages)
+        XCTAssertNotNil(cached)
+        XCTAssertEqual(cached?[0].name, "english")
+    }
+
+    func testCachedTagsShownOnNetworkFailure() async {
+        let tags = [TestFixtures.makeTag(name: "rock")]
+        await cache.save(key: StationCacheService.browseTags, value: tags)
+
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadTags()
+
+        XCTAssertEqual(vm.tags.count, 1)
+        XCTAssertEqual(vm.tags[0].name, "rock")
+        XCTAssertNil(vm.tagsError)
+    }
+
+    func testTagsCacheUpdatedAfterFetch() async {
+        let json = """
+        [
+            {"name": "rock", "stationcount": 5000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadTags()
+
+        let cached: [Tag]? = await cache.load(key: StationCacheService.browseTags)
+        XCTAssertNotNil(cached)
+        XCTAssertEqual(cached?[0].name, "rock")
     }
 
     // MARK: - Helpers

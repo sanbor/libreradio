@@ -896,9 +896,9 @@ Each loads lazily on appear.
 
 #### `CountryListView.swift`
 
-`List` of countries sorted by `stationcount` descending. Each row:
-- Flag emoji (ISO code → Unicode regional indicator: `code.unicodeScalars.compactMap { Unicode.Scalar(127397 + $0.value) }`)
-- Country name
+`List` of countries sorted alphabetically ascending by `displayName` (derived from ISO code via `Locale(identifier: "en")`). Each row:
+- Flag emoji (ISO code → Unicode regional indicator: `code.unicodeScalars.compactMap { Unicode.Scalar(127397 + $0.value) }`) — flags do not render in the iOS Simulator; use a physical device to verify
+- Country display name (from ISO code, falling back to API name)
 - Station count badge
 
 Tapping → `StationListView(filter: .country(country.iso_3166_1))`.

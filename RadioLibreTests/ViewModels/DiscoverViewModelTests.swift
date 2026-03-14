@@ -6,6 +6,8 @@ final class DiscoverViewModelTests: XCTestCase {
 
     private var discovery: ServerDiscoveryService!
     private var service: RadioBrowserService!
+    private var suiteName: String!
+    private var cache: StationCacheService!
 
     override func setUp() async throws {
         discovery = ServerDiscoveryService()
@@ -13,10 +15,17 @@ final class DiscoverViewModelTests: XCTestCase {
 
         let session = TestFixtures.makeMockSession()
         service = RadioBrowserService(discovery: discovery, session: session)
+
+        suiteName = "test.discover.\(UUID().uuidString)"
+        let testDefaults = UserDefaults(suiteName: suiteName)!
+        cache = StationCacheService(defaults: testDefaults)
     }
 
     override func tearDown() {
         MockURLProtocol.requestHandler = nil
+        if let suiteName = suiteName {
+            UserDefaults.standard.removePersistentDomain(forName: suiteName)
+        }
     }
 
     func testLoadPopulatesAllSections() async {
@@ -26,7 +35,7 @@ final class DiscoverViewModelTests: XCTestCase {
             return (response, data)
         }
 
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
         await vm.load()
 
         XCTAssertFalse(vm.isLoading)
@@ -43,7 +52,7 @@ final class DiscoverViewModelTests: XCTestCase {
             throw URLError(.notConnectedToInternet)
         }
 
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
         await vm.load()
 
         XCTAssertFalse(vm.isLoading)
@@ -56,7 +65,7 @@ final class DiscoverViewModelTests: XCTestCase {
             return (response, Data())
         }
 
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
         await vm.load()
 
         XCTAssertNotNil(vm.error)
@@ -71,7 +80,7 @@ final class DiscoverViewModelTests: XCTestCase {
             return (response, data)
         }
 
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
         await vm.load()
         let firstCallCount = callCount
         XCTAssertGreaterThan(firstCallCount, 0)
@@ -87,7 +96,7 @@ final class DiscoverViewModelTests: XCTestCase {
             return (response, data)
         }
 
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
         vm.isLoading = true // simulate already loading
 
         // Should return immediately due to guard
@@ -98,7 +107,7 @@ final class DiscoverViewModelTests: XCTestCase {
     }
 
     func testInitialState() {
-        let vm = DiscoverViewModel(service: service)
+        let vm = DiscoverViewModel(service: service, cache: cache)
 
         XCTAssertTrue(vm.localStations.isEmpty)
         XCTAssertTrue(vm.topByClicks.isEmpty)
@@ -107,5 +116,79 @@ final class DiscoverViewModelTests: XCTestCase {
         XCTAssertTrue(vm.currentlyPlaying.isEmpty)
         XCTAssertFalse(vm.isLoading)
         XCTAssertNil(vm.error)
+    }
+
+    // MARK: - Cache Tests
+
+    func testCachedDataShownOnNetworkFailure() async {
+        let stations = [TestFixtures.makeStation(uuid: "cached-1", name: "Cached Station")]
+        let localCountry = Locale.current.region?.identifier ?? "US"
+        await cache.save(key: StationCacheService.localKey(countryCode: localCountry), value: stations)
+        await cache.save(key: StationCacheService.discoverTopClicks, value: stations)
+        await cache.save(key: StationCacheService.discoverTopVotes, value: stations)
+        await cache.save(key: StationCacheService.discoverRecentlyChanged, value: stations)
+        await cache.save(key: StationCacheService.discoverCurrentlyPlaying, value: stations)
+
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = DiscoverViewModel(service: service, cache: cache)
+        await vm.load()
+
+        XCTAssertEqual(vm.topByClicks.count, 1)
+        XCTAssertEqual(vm.topByClicks[0].name, "Cached Station")
+        XCTAssertNil(vm.error)
+        XCTAssertFalse(vm.isLoading)
+    }
+
+    func testFreshDataReplacesCachedData() async {
+        let oldStations = [TestFixtures.makeStation(uuid: "old-1", name: "Old Station")]
+        let localCountry = Locale.current.region?.identifier ?? "US"
+        await cache.save(key: StationCacheService.localKey(countryCode: localCountry), value: oldStations)
+        await cache.save(key: StationCacheService.discoverTopClicks, value: oldStations)
+        await cache.save(key: StationCacheService.discoverTopVotes, value: oldStations)
+        await cache.save(key: StationCacheService.discoverRecentlyChanged, value: oldStations)
+        await cache.save(key: StationCacheService.discoverCurrentlyPlaying, value: oldStations)
+
+        MockURLProtocol.requestHandler = { request in
+            let data = TestFixtures.stationArrayJSON(count: 3).data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = DiscoverViewModel(service: service, cache: cache)
+        await vm.load()
+
+        XCTAssertEqual(vm.topByClicks.count, 3)
+        XCTAssertFalse(vm.isLoading)
+    }
+
+    func testCacheUpdatedAfterSuccessfulFetch() async {
+        MockURLProtocol.requestHandler = { request in
+            let data = TestFixtures.stationArrayJSON(count: 2).data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = DiscoverViewModel(service: service, cache: cache)
+        await vm.load()
+
+        let cached: [StationDTO]? = await cache.load(key: StationCacheService.discoverTopClicks)
+        XCTAssertNotNil(cached)
+        XCTAssertEqual(cached?.count, 2)
+    }
+
+    func testNetworkFailureWithoutCacheShowsError() async {
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = DiscoverViewModel(service: service, cache: cache)
+        await vm.load()
+
+        XCTAssertNotNil(vm.error)
+        XCTAssertTrue(vm.localStations.isEmpty)
+        XCTAssertFalse(vm.isLoading)
     }
 }

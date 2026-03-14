@@ -158,7 +158,7 @@ Three navigation links: Countries, Languages, Tags.
 
 ### Category Lists
 
-**Countries:** sorted by station count descending. Each row shows flag emoji (derived from ISO code), country name, station count. Locally searchable. Tapping → station list for that country.
+**Countries:** sorted alphabetically ascending by display name (derived from ISO code via `Locale`). Each row shows flag emoji (derived from ISO code), country display name, station count. Locally searchable. Tapping → station list for that country. Note: flag emojis do not render properly in the iOS Simulator; test on a physical device to verify flag display.
 
 **Languages:** sorted by station count descending. Each row shows language name, station count. Tapping → station list for that language.
 

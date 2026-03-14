@@ -14,7 +14,8 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(country.name, "Germany")
         XCTAssertEqual(country.iso_3166_1, "DE")
         XCTAssertEqual(country.stationcount, 500)
-        XCTAssertEqual(country.id, "Germany")
+        XCTAssertEqual(country.id, "DE")
+        XCTAssertEqual(country.displayName, "Germany")
     }
 
     func testDecodeCountryArray() throws {
@@ -29,6 +30,16 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(countries.count, 2)
         XCTAssertEqual(countries[0].iso_3166_1, "DE")
         XCTAssertEqual(countries[1].iso_3166_1, "US")
+    }
+
+    func testDisplayNameFromISOCode() {
+        let country = Country(name: "The United States Of America", iso_3166_1: "US", stationcount: 1000)
+        XCTAssertEqual(country.displayName, "United States")
+    }
+
+    func testDisplayNameFallbackWhenISOEmpty() {
+        let country = Country(name: "Unknown Place", iso_3166_1: "", stationcount: 10)
+        XCTAssertEqual(country.displayName, "Unknown Place")
     }
 
     // MARK: - Language

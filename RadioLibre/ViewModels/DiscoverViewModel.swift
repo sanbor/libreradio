@@ -11,9 +11,11 @@ final class DiscoverViewModel: ObservableObject {
     @Published var error: AppError?
 
     private let service: RadioBrowserService
+    private let cache: StationCacheService
 
-    init(service: RadioBrowserService = .shared) {
+    init(service: RadioBrowserService = .shared, cache: StationCacheService = .shared) {
         self.service = service
+        self.cache = cache
     }
 
     func load() async {
@@ -22,7 +24,27 @@ final class DiscoverViewModel: ObservableObject {
         error = nil
 
         let localCountry = Locale.current.region?.identifier ?? "US"
+        let localCacheKey = StationCacheService.localKey(countryCode: localCountry)
 
+        // Load from cache first
+        let cachedLocal: [StationDTO]? = await cache.load(key: localCacheKey)
+        let cachedClicks: [StationDTO]? = await cache.load(key: StationCacheService.discoverTopClicks)
+        let cachedVotes: [StationDTO]? = await cache.load(key: StationCacheService.discoverTopVotes)
+        let cachedChanged: [StationDTO]? = await cache.load(key: StationCacheService.discoverRecentlyChanged)
+        let cachedPlaying: [StationDTO]? = await cache.load(key: StationCacheService.discoverCurrentlyPlaying)
+
+        let hasCache = cachedLocal != nil || cachedClicks != nil || cachedVotes != nil
+            || cachedChanged != nil || cachedPlaying != nil
+
+        if hasCache {
+            localStations = cachedLocal ?? []
+            topByClicks = cachedClicks ?? []
+            topByVotes = cachedVotes ?? []
+            recentlyChanged = cachedChanged ?? []
+            currentlyPlaying = cachedPlaying ?? []
+        }
+
+        // Always fetch fresh data
         do {
             async let local = service.fetchLocalStations(countrycode: localCountry, limit: 20)
             async let clicks = service.fetchTopByClicks(limit: 20)
@@ -35,10 +57,17 @@ final class DiscoverViewModel: ObservableObject {
             topByVotes = try await votes
             recentlyChanged = try await changed
             currentlyPlaying = try await playing
+
+            // Update cache
+            await cache.save(key: localCacheKey, value: localStations)
+            await cache.save(key: StationCacheService.discoverTopClicks, value: topByClicks)
+            await cache.save(key: StationCacheService.discoverTopVotes, value: topByVotes)
+            await cache.save(key: StationCacheService.discoverRecentlyChanged, value: recentlyChanged)
+            await cache.save(key: StationCacheService.discoverCurrentlyPlaying, value: currentlyPlaying)
         } catch let appError as AppError {
-            error = appError
+            if !hasCache { error = appError }
         } catch {
-            self.error = .networkUnavailable
+            if !hasCache { self.error = .networkUnavailable }
         }
 
         isLoading = false
