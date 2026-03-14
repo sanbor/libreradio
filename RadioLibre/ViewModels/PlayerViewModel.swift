@@ -6,6 +6,7 @@ final class PlayerViewModel: ObservableObject {
     let audioService: AudioPlayerService
     private let radioBrowserService: RadioBrowserService
     private let historyService: HistoryService
+    private let favoritesService: FavoritesService
     private var cancellable: AnyCancellable?
     /// Exposed for testing – lets callers await the fire-and-forget history write.
     private(set) var historyTask: Task<Void, Never>?
@@ -14,11 +15,13 @@ final class PlayerViewModel: ObservableObject {
     init(
         audioService: AudioPlayerService,
         radioBrowserService: RadioBrowserService = .shared,
-        historyService: HistoryService = .shared
+        historyService: HistoryService = .shared,
+        favoritesService: FavoritesService = .shared
     ) {
         self.audioService = audioService
         self.radioBrowserService = radioBrowserService
         self.historyService = historyService
+        self.favoritesService = favoritesService
 
         // Forward audioService state changes to trigger objectWillChange
         cancellable = audioService.objectWillChange.sink { [weak self] _ in
@@ -70,5 +73,41 @@ final class PlayerViewModel: ObservableObject {
 
     func vote(station: StationDTO) async throws -> VoteResponse {
         try await radioBrowserService.vote(stationuuid: station.stationuuid)
+    }
+
+    func voteForCurrentStation() async -> String? {
+        guard let station = currentStation else { return nil }
+        do {
+            let response = try await radioBrowserService.vote(stationuuid: station.stationuuid)
+            return response.message
+        } catch {
+            return nil
+        }
+    }
+
+    func playNextFavorite() async {
+        let favorites = await favoritesService.allFavorites()
+        guard !favorites.isEmpty else { return }
+
+        if let current = currentStation,
+           let idx = favorites.firstIndex(where: { $0.stationuuid == current.stationuuid }) {
+            let next = favorites[(idx + 1) % favorites.count]
+            play(station: next.toStationDTO())
+        } else {
+            play(station: favorites[0].toStationDTO())
+        }
+    }
+
+    func playPreviousFavorite() async {
+        let favorites = await favoritesService.allFavorites()
+        guard !favorites.isEmpty else { return }
+
+        if let current = currentStation,
+           let idx = favorites.firstIndex(where: { $0.stationuuid == current.stationuuid }) {
+            let prev = favorites[(idx - 1 + favorites.count) % favorites.count]
+            play(station: prev.toStationDTO())
+        } else {
+            play(station: favorites[0].toStationDTO())
+        }
     }
 }

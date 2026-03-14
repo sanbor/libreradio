@@ -26,26 +26,44 @@ struct DiscoverView: View {
     private var stationsList: some View {
         List {
             if !viewModel.localStations.isEmpty {
-                stationSection(title: "Local Stations", stations: viewModel.localStations)
+                Section {
+                    StationCarouselView(title: "Local Stations", stations: viewModel.localStations) { station in
+                        playerVM.play(station: station)
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
 
             if !viewModel.topByClicks.isEmpty {
-                stationSection(title: "Top Stations", stations: viewModel.topByClicks)
+                Section {
+                    StationCarouselView(title: "Top Stations", stations: viewModel.topByClicks) { station in
+                        playerVM.play(station: station)
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
 
             if !viewModel.topByVotes.isEmpty {
-                stationSection(title: "Most Voted", stations: viewModel.topByVotes)
+                Section {
+                    StationCarouselView(title: "Most Voted", stations: viewModel.topByVotes) { station in
+                        playerVM.play(station: station)
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
 
             if !viewModel.recentlyChanged.isEmpty {
-                stationSection(
+                verticalSection(
                     title: "Recently Changed",
                     stations: Array(viewModel.recentlyChanged.prefix(10))
                 )
             }
 
             if !viewModel.currentlyPlaying.isEmpty {
-                stationSection(
+                verticalSection(
                     title: "Now Playing",
                     stations: Array(viewModel.currentlyPlaying.prefix(10))
                 )
@@ -54,7 +72,7 @@ struct DiscoverView: View {
         .listStyle(.insetGrouped)
     }
 
-    private func stationSection(title: String, stations: [StationDTO]) -> some View {
+    private func verticalSection(title: String, stations: [StationDTO]) -> some View {
         Section(title) {
             ForEach(stations) { station in
                 let isConnecting = playerVM.isLoading && playerVM.currentStation?.stationuuid == station.stationuuid

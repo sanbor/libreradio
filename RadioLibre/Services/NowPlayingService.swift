@@ -76,19 +76,14 @@ final class NowPlayingService {
     // MARK: - Artwork
 
     private func loadArtwork(from url: URL, for station: StationDTO) async {
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            guard let image = UIImage(data: data) else { return }
+        guard let image = await ImageCacheService.shared.image(for: url) else { return }
 
-            let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+        let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
 
-            // Update existing info with artwork
-            if var info = MPNowPlayingInfoCenter.default().nowPlayingInfo {
-                info[MPMediaItemPropertyArtwork] = artwork
-                MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-            }
-        } catch {
-            // Artwork is best-effort — ignore failures
+        // Update existing info with artwork
+        if var info = MPNowPlayingInfoCenter.default().nowPlayingInfo {
+            info[MPMediaItemPropertyArtwork] = artwork
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = info
         }
     }
 }

@@ -116,6 +116,13 @@ final class SearchViewModel: ObservableObject {
         isSearching = false
     }
 
+    var hasActiveFilters: Bool {
+        filterCountrycode != nil ||
+        filterLanguage != nil ||
+        filterCodec != nil ||
+        filterBitrateMin != nil
+    }
+
     func clearFilters() {
         filterCountrycode = nil
         filterLanguage = nil

@@ -14,8 +14,7 @@ struct MiniPlayerView: View {
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showFullPlayer) {
-                    // Full player wired in Phase 5
-                    Text("Full Player — Coming Soon")
+                    FullPlayerView()
                 }
             } else {
                 idleContent
@@ -26,14 +25,7 @@ struct MiniPlayerView: View {
 
     private func activeContent(station: StationDTO) -> some View {
         HStack(spacing: 12) {
-            // Favicon placeholder (Phase 5 adds FaviconImageView)
-            Image(systemName: "radio")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 40, height: 40)
-                .foregroundStyle(.secondary)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            FaviconImageView(url: station.faviconURL, size: 40)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(station.name)
@@ -92,13 +84,7 @@ struct MiniPlayerView: View {
 
     private var idleContent: some View {
         HStack(spacing: 12) {
-            Image(systemName: "radio")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 40, height: 40)
-                .foregroundStyle(.secondary)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            FaviconImageView(url: nil, size: 40)
 
             Text("Not Playing")
                 .font(.subheadline)

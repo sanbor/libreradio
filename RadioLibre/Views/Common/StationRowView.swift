@@ -12,14 +12,7 @@ struct StationRowView: View {
             onTap?()
         } label: {
             HStack(spacing: 12) {
-                // Favicon placeholder (Phase 5 adds ImageCacheService)
-                Image(systemName: "radio")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 44, height: 44)
-                    .foregroundStyle(.secondary)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                FaviconImageView(url: station.faviconURL, size: 44)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(station.name)
