@@ -93,13 +93,7 @@ private struct RecentStationRow: View {
             onTap?()
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: "radio")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 44, height: 44)
-                    .foregroundStyle(.secondary)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                FaviconImageView(url: entry.faviconURL.flatMap { URL(string: $0) }, size: 44)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(entry.name)

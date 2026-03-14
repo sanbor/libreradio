@@ -38,6 +38,10 @@ struct MiniPlayerView: View {
                     Text("Connecting...")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else if playerVM.isBuffering {
+                    Text("Buffering...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } else if let errorMessage = playerVM.errorMessage {
                     Text(errorMessage)
                         .font(.caption)

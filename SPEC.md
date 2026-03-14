@@ -242,6 +242,17 @@ Automatic record of played stations, shown in the **Recent** tab.
 | Stop | Return to idle, clear everything |
 | Toggle | Pause if playing, resume if paused |
 
+### Stream Buffering
+
+Configures forward buffering to reduce audio interruptions on variable connections.
+
+- Minimum forward buffer: 3 seconds (`preferredForwardBufferDuration`)
+- `automaticallyWaitsToMinimizeStalling` enabled on the player
+- Adaptive buffering: on each stall (buffer empty), increase buffer duration by 3 seconds, up to 15 seconds max
+- Buffer config resets when switching to a different station; preserved when resuming the same station
+- `stop()` resets all buffer state
+- UI shows "Buffering..." in the mini player during mid-stream stalls (distinct from initial "Connecting...")
+
 ### Click Tracking
 
 Every time a user plays a station, a click is reported to the API. Fire-and-forget — errors are silently ignored. Server enforces one click per IP per station per 24 hours.

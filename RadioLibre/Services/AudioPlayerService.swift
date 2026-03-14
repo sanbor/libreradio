@@ -59,13 +59,23 @@ final class AudioPlayerService: ObservableObject {
         return false
     }
 
+    @Published private(set) var isBuffering: Bool = false
+
     // MARK: - Private
 
-    private let player: AVPlayer
+    private static let initialBufferDuration: TimeInterval = 3.0
+    private static let stallBufferIncrement: TimeInterval = 3.0
+    private static let maxBufferDuration: TimeInterval = 15.0
+
+    let player: AVPlayer
     private var playerItemObservation: NSKeyValueObservation?
     private var timeControlObservation: NSKeyValueObservation?
+    private var bufferEmptyObservation: NSKeyValueObservation?
+    private var bufferKeepUpObservation: NSKeyValueObservation?
     private let service: RadioBrowserService
     private let nowPlayingService: NowPlayingService
+    private var currentBufferDuration: TimeInterval = initialBufferDuration
+    private var stallCount: Int = 0
 
     // MARK: - Init
 
@@ -92,16 +102,30 @@ final class AudioPlayerService: ObservableObject {
             return
         }
 
+        // Reset buffer config when switching to a different station
+        if currentStation?.stationuuid != station.stationuuid {
+            currentBufferDuration = Self.initialBufferDuration
+            stallCount = 0
+        }
+
         state = .loading(station: station)
 
         // Cancel any existing observations for the old item
         playerItemObservation?.invalidate()
         playerItemObservation = nil
+        bufferEmptyObservation?.invalidate()
+        bufferEmptyObservation = nil
+        bufferKeepUpObservation?.invalidate()
+        bufferKeepUpObservation = nil
 
         let asset = AVURLAsset(url: streamURL)
         let item = AVPlayerItem(asset: asset)
+        item.preferredForwardBufferDuration = currentBufferDuration
+
+        player.automaticallyWaitsToMinimizeStalling = true
 
         observePlayerItemStatus(item: item, station: station)
+        observeBufferState(item: item, station: station)
 
         player.replaceCurrentItem(with: item)
         player.play()
@@ -132,6 +156,13 @@ final class AudioPlayerService: ObservableObject {
         player.replaceCurrentItem(with: nil)
         playerItemObservation?.invalidate()
         playerItemObservation = nil
+        bufferEmptyObservation?.invalidate()
+        bufferEmptyObservation = nil
+        bufferKeepUpObservation?.invalidate()
+        bufferKeepUpObservation = nil
+        isBuffering = false
+        stallCount = 0
+        currentBufferDuration = Self.initialBufferDuration
         state = .idle
         nowPlayingService.clearNowPlaying()
     }
@@ -241,6 +272,26 @@ final class AudioPlayerService: ObservableObject {
                 @unknown default:
                     break
                 }
+            }
+        }
+    }
+
+    private func observeBufferState(item: AVPlayerItem, station: StationDTO) {
+        bufferEmptyObservation = item.observe(\.isPlaybackBufferEmpty, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor [weak self] in
+                guard let self, item.isPlaybackBufferEmpty else { return }
+                self.isBuffering = true
+                self.stallCount += 1
+                let newDuration = Self.initialBufferDuration + Self.stallBufferIncrement * TimeInterval(self.stallCount)
+                self.currentBufferDuration = min(newDuration, Self.maxBufferDuration)
+                item.preferredForwardBufferDuration = self.currentBufferDuration
+            }
+        }
+
+        bufferKeepUpObservation = item.observe(\.isPlaybackLikelyToKeepUp, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor [weak self] in
+                guard let self, item.isPlaybackLikelyToKeepUp else { return }
+                self.isBuffering = false
             }
         }
     }

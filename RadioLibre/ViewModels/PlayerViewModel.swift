@@ -43,6 +43,10 @@ final class PlayerViewModel: ObservableObject {
         audioService.isLoading
     }
 
+    var isBuffering: Bool {
+        audioService.isBuffering
+    }
+
     var errorMessage: String? {
         if case .error(_, let message) = audioService.state {
             return message

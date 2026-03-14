@@ -11,6 +11,9 @@ final class BrowseViewModel: ObservableObject {
     @Published var countriesError: AppError?
     @Published var languagesError: AppError?
     @Published var tagsError: AppError?
+    @Published var countrySortOrder: BrowseSortOrder = .alphabetical
+    @Published var languagesSortOrder: BrowseSortOrder = .byStationCount
+    @Published var tagsSortOrder: BrowseSortOrder = .byStationCount
 
     private let service: RadioBrowserService
     private let cache: StationCacheService
@@ -33,7 +36,7 @@ final class BrowseViewModel: ObservableObject {
 
         do {
             let result = try await service.fetchCountries()
-            countries = result.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+            countries = result
             await cache.save(key: StationCacheService.browseCountries, value: countries)
         } catch let appError as AppError {
             if !hasCache { countriesError = appError }
@@ -57,7 +60,7 @@ final class BrowseViewModel: ObservableObject {
 
         do {
             let result = try await service.fetchLanguages()
-            languages = result.sorted { $0.stationcount > $1.stationcount }
+            languages = result
             await cache.save(key: StationCacheService.browseLanguages, value: languages)
         } catch let appError as AppError {
             if !hasCache { languagesError = appError }
@@ -81,7 +84,7 @@ final class BrowseViewModel: ObservableObject {
 
         do {
             let result = try await service.fetchTags()
-            tags = result.sorted { $0.stationcount > $1.stationcount }
+            tags = result
             await cache.save(key: StationCacheService.browseTags, value: tags)
         } catch let appError as AppError {
             if !hasCache { tagsError = appError }
@@ -90,5 +93,32 @@ final class BrowseViewModel: ObservableObject {
         }
 
         isLoadingTags = false
+    }
+
+    var sortedCountries: [Country] {
+        switch countrySortOrder {
+        case .alphabetical:
+            countries.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+        case .byStationCount:
+            countries.sorted { $0.stationcount > $1.stationcount }
+        }
+    }
+
+    var sortedLanguages: [Language] {
+        switch languagesSortOrder {
+        case .alphabetical:
+            languages.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        case .byStationCount:
+            languages.sorted { $0.stationcount > $1.stationcount }
+        }
+    }
+
+    var sortedTags: [Tag] {
+        switch tagsSortOrder {
+        case .alphabetical:
+            tags.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        case .byStationCount:
+            tags.sorted { $0.stationcount > $1.stationcount }
+        }
     }
 }

@@ -620,6 +620,18 @@ final class AudioPlayerService: ObservableObject {
 }
 ```
 
+**Stream buffering:**
+
+```swift
+// Buffer configuration:
+// - preferredForwardBufferDuration = 3s (initial), adaptive up to 15s
+// - automaticallyWaitsToMinimizeStalling = true
+// - KVO on isPlaybackBufferEmpty → isBuffering = true, escalate buffer
+// - KVO on isPlaybackLikelyToKeepUp → isBuffering = false
+// - Reset buffer config on station change; preserve on resume
+// - stop() resets all buffer state
+```
+
 **Audio session interruption handling:**
 
 ```swift

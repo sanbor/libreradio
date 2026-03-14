@@ -308,6 +308,54 @@ final class AudioPlayerServiceTests: XCTestCase {
         XCTAssertEqual(service.state, .paused(station: station))
     }
 
+    // MARK: - Buffer Configuration
+
+    func testBufferDurationIsSetOnPlayerItem() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        XCTAssertEqual(service.player.currentItem?.preferredForwardBufferDuration, 3.0)
+    }
+
+    func testAutomaticallyWaitsToMinimizeStalling() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        XCTAssertTrue(service.player.automaticallyWaitsToMinimizeStalling)
+    }
+
+    func testIsBufferingDefaultsFalse() {
+        XCTAssertFalse(service.isBuffering)
+    }
+
+    func testStopResetsBufferState() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.stop()
+
+        XCTAssertFalse(service.isBuffering)
+    }
+
+    func testPlayNewStationResetsBufferConfig() {
+        let station1 = TestFixtures.makeStation(uuid: "buffer-1", name: "Station 1")
+        let station2 = TestFixtures.makeStation(uuid: "buffer-2", name: "Station 2")
+
+        service.play(station: station1)
+        service.play(station: station2)
+
+        XCTAssertEqual(service.player.currentItem?.preferredForwardBufferDuration, 3.0)
+    }
+
+    func testResumePreservesBufferDuration() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        let initialDuration = service.player.currentItem?.preferredForwardBufferDuration
+        service.pause()
+        service.resume()
+
+        XCTAssertEqual(service.player.currentItem?.preferredForwardBufferDuration, initialDuration)
+    }
+
     func testRouteChangeNewDeviceDoesNotPause() {
         let station = TestFixtures.makeStation()
         service.play(station: station)

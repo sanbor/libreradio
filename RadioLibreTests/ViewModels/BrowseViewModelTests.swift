@@ -44,10 +44,11 @@ final class BrowseViewModelTests: XCTestCase {
         await vm.loadCountries()
 
         XCTAssertEqual(vm.countries.count, 3)
-        // Should be sorted alphabetically by displayName
-        XCTAssertEqual(vm.countries[0].displayName, "France")
-        XCTAssertEqual(vm.countries[1].displayName, "Germany")
-        XCTAssertEqual(vm.countries[2].displayName, "United States")
+        // Raw data is stored in API order (unsorted)
+        let names = Set(vm.countries.map(\.displayName))
+        XCTAssertTrue(names.contains("France"))
+        XCTAssertTrue(names.contains("Germany"))
+        XCTAssertTrue(names.contains("United States"))
         XCTAssertFalse(vm.isLoadingCountries)
         XCTAssertNil(vm.countriesError)
     }
@@ -182,6 +183,126 @@ final class BrowseViewModelTests: XCTestCase {
         XCTAssertNil(vm.tagsError)
     }
 
+    func testDefaultSortOrders() {
+        let vm = BrowseViewModel(service: service, cache: cache)
+
+        XCTAssertEqual(vm.countrySortOrder, .alphabetical)
+        XCTAssertEqual(vm.languagesSortOrder, .byStationCount)
+        XCTAssertEqual(vm.tagsSortOrder, .byStationCount)
+    }
+
+    // MARK: - Sorted Computed Properties
+
+    func testSortedCountriesAlphabetical() async {
+        let json = """
+        [
+            {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000},
+            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadCountries()
+        vm.countrySortOrder = .alphabetical
+
+        XCTAssertEqual(vm.sortedCountries[0].displayName, "France")
+        XCTAssertEqual(vm.sortedCountries[1].displayName, "Germany")
+        XCTAssertEqual(vm.sortedCountries[2].displayName, "United States")
+    }
+
+    func testSortedCountriesByStationCount() async {
+        let json = """
+        [
+            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300},
+            {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadCountries()
+        vm.countrySortOrder = .byStationCount
+
+        XCTAssertEqual(vm.sortedCountries[0].stationcount, 1000)
+        XCTAssertEqual(vm.sortedCountries[1].stationcount, 500)
+        XCTAssertEqual(vm.sortedCountries[2].stationcount, 300)
+    }
+
+    func testSortedLanguagesAlphabetical() async {
+        let json = """
+        [
+            {"name": "german", "iso_639": "deu", "stationcount": 5000},
+            {"name": "english", "iso_639": "eng", "stationcount": 10000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+        vm.languagesSortOrder = .alphabetical
+
+        XCTAssertEqual(vm.sortedLanguages[0].name, "english")
+        XCTAssertEqual(vm.sortedLanguages[1].name, "german")
+    }
+
+    func testSortedLanguagesByStationCount() async {
+        let json = """
+        [
+            {"name": "english", "iso_639": "eng", "stationcount": 10000},
+            {"name": "german", "iso_639": "deu", "stationcount": 5000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+        vm.languagesSortOrder = .byStationCount
+
+        XCTAssertEqual(vm.sortedLanguages[0].name, "english")
+        XCTAssertEqual(vm.sortedLanguages[1].name, "german")
+    }
+
+    func testSortedTagsAlphabetical() async {
+        let json = """
+        [
+            {"name": "rock", "stationcount": 5000},
+            {"name": "jazz", "stationcount": 2000},
+            {"name": "pop", "stationcount": 3000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadTags()
+        vm.tagsSortOrder = .alphabetical
+
+        XCTAssertEqual(vm.sortedTags[0].name, "jazz")
+        XCTAssertEqual(vm.sortedTags[1].name, "pop")
+        XCTAssertEqual(vm.sortedTags[2].name, "rock")
+    }
+
+    func testSortedTagsByStationCount() async {
+        let json = """
+        [
+            {"name": "jazz", "stationcount": 2000},
+            {"name": "rock", "stationcount": 5000},
+            {"name": "pop", "stationcount": 3000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadTags()
+        vm.tagsSortOrder = .byStationCount
+
+        XCTAssertEqual(vm.sortedTags[0].name, "rock")
+        XCTAssertEqual(vm.sortedTags[1].name, "pop")
+        XCTAssertEqual(vm.sortedTags[2].name, "jazz")
+    }
+
     // MARK: - Cache Tests
 
     func testCachedCountriesShownOnNetworkFailure() async {
@@ -220,9 +341,9 @@ final class BrowseViewModelTests: XCTestCase {
         await vm.loadCountries()
 
         XCTAssertEqual(vm.countries.count, 2)
-        // Sorted alphabetically: France before Germany
-        XCTAssertEqual(vm.countries[0].displayName, "France")
-        XCTAssertEqual(vm.countries[1].displayName, "Germany")
+        let names = Set(vm.countries.map(\.displayName))
+        XCTAssertTrue(names.contains("France"))
+        XCTAssertTrue(names.contains("Germany"))
     }
 
     func testCountriesCacheUpdatedAfterFetch() async {
