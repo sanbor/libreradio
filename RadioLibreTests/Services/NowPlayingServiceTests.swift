@@ -26,8 +26,23 @@ final class NowPlayingServiceTests: XCTestCase {
         XCTAssertEqual(info?[MPMediaItemPropertyTitle] as? String, "Jazz FM")
     }
 
-    func testUpdateNowPlayingSetsArtist() {
-        // country is nil in makeStation, so artist falls back to ""
+    func testUpdateNowPlayingSetsArtistWithFlagAndCountry() {
+        let station = StationDTOTests.makeStation(country: "France", countrycode: "FR")
+        service.updateNowPlaying(station: station, isPlaying: true)
+
+        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
+        XCTAssertEqual(info?[MPMediaItemPropertyArtist] as? String, "🇫🇷 France")
+    }
+
+    func testUpdateNowPlayingSetsArtistWithCountryOnly() {
+        let station = StationDTOTests.makeStation(country: "France")
+        service.updateNowPlaying(station: station, isPlaying: true)
+
+        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
+        XCTAssertEqual(info?[MPMediaItemPropertyArtist] as? String, "France")
+    }
+
+    func testUpdateNowPlayingSetsArtistEmptyWhenNoCountry() {
         let station = StationDTOTests.makeStation()
         service.updateNowPlaying(station: station, isPlaying: true)
 

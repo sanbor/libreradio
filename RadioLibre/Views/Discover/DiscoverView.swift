@@ -25,6 +25,26 @@ struct DiscoverView: View {
 
     private var stationsList: some View {
         List {
+            if !viewModel.favoriteStations.isEmpty {
+                Section {
+                    StationCarouselView(title: "Favorites", stations: viewModel.favoriteStations) { station in
+                        playerVM.play(station: station)
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+            }
+
+            if !viewModel.recentStations.isEmpty {
+                Section {
+                    StationCarouselView(title: "Recently Played", stations: viewModel.recentStations) { station in
+                        playerVM.play(station: station)
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+            }
+
             if !viewModel.localStations.isEmpty {
                 Section {
                     StationCarouselView(title: "Local Stations", stations: viewModel.localStations) { station in

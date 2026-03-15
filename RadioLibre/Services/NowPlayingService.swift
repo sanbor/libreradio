@@ -20,7 +20,10 @@ final class NowPlayingService {
     func updateNowPlaying(station: StationDTO, isPlaying: Bool) {
         var info = [String: Any]()
         info[MPMediaItemPropertyTitle] = station.name
-        info[MPMediaItemPropertyArtist] = station.country ?? ""
+        var artistParts: [String] = []
+        if let flag = station.flagEmoji { artistParts.append(flag) }
+        if let country = station.country, !country.isEmpty { artistParts.append(country) }
+        info[MPMediaItemPropertyArtist] = artistParts.joined(separator: " ")
         info[MPMediaItemPropertyAlbumTitle] = station.tagList.prefix(3).joined(separator: ", ")
         info[MPNowPlayingInfoPropertyIsLiveStream] = true
         info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0

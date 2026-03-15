@@ -2,6 +2,8 @@ import Foundation
 
 @MainActor
 final class DiscoverViewModel: ObservableObject {
+    @Published var favoriteStations: [StationDTO] = []
+    @Published var recentStations: [StationDTO] = []
     @Published var localStations: [StationDTO] = []
     @Published var topByClicks: [StationDTO] = []
     @Published var topByVotes: [StationDTO] = []
@@ -12,16 +14,28 @@ final class DiscoverViewModel: ObservableObject {
 
     private let service: RadioBrowserService
     private let cache: StationCacheService
+    private let favoritesService: FavoritesService
+    private let historyService: HistoryService
 
-    init(service: RadioBrowserService = .shared, cache: StationCacheService = .shared) {
+    init(
+        service: RadioBrowserService = .shared,
+        cache: StationCacheService = .shared,
+        favoritesService: FavoritesService = .shared,
+        historyService: HistoryService = .shared
+    ) {
         self.service = service
         self.cache = cache
+        self.favoritesService = favoritesService
+        self.historyService = historyService
     }
 
     func load() async {
         guard !isLoading else { return }
         isLoading = true
         error = nil
+
+        // Load local data (favorites + recents) immediately
+        await loadLocalData()
 
         let localCountry = Locale.current.region?.identifier ?? "US"
         let localCacheKey = StationCacheService.localKey(countryCode: localCountry)
@@ -76,5 +90,20 @@ final class DiscoverViewModel: ObservableObject {
     func refresh() async {
         isLoading = false // allow re-entry
         await load()
+    }
+
+    private func loadLocalData() async {
+        let favorites = await favoritesService.allFavorites()
+        favoriteStations = favorites.map { $0.toStationDTO() }
+
+        let recents = await historyService.recentEntries(limit: 10)
+        // Deduplicate by stationuuid — history can have repeats of the same station,
+        // and StationDTO.id == stationuuid, so duplicates break ForEach rendering.
+        var seen = Set<String>()
+        recentStations = recents.compactMap { entry -> StationDTO? in
+            let dto = entry.toStationDTO()
+            guard seen.insert(dto.stationuuid).inserted else { return nil }
+            return dto
+        }
     }
 }

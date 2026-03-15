@@ -98,15 +98,19 @@ A mini player bar sits above the tab bar whenever a station is loaded.
 
 Shows curated station sections at a glance.
 
-| Section | Source | Limit | Layout |
-|---|---|---|---|
-| Local Stations | User's country (auto-detected from locale, default "US") | 20 | Horizontal carousel |
-| Top Stations | Most clicked in last 24h | 20 | Horizontal carousel |
-| Most Voted | Most voted all time | 20 | Horizontal carousel |
-| Recently Changed | Most recently added/changed | 10 | Vertical list |
-| Now Playing | Most recently clicked by anyone | 10 | Vertical list |
+| Section | Source | Limit | Layout | Condition |
+|---|---|---|---|---|
+| Favorites | User's favorited stations (local) | All | Horizontal carousel | Only if favorites exist |
+| Recently Played | User's play history (local) | 10 | Horizontal carousel | Only if history exists |
+| Local Stations | User's country (auto-detected from locale, default "US") | 20 | Horizontal carousel | — |
+| Top Stations | Most clicked in last 24h | 20 | Horizontal carousel | — |
+| Most Voted | Most voted all time | 20 | Horizontal carousel | — |
+| Recently Changed | Most recently added/changed | 10 | Vertical list | — |
+| Now Playing | Most recently clicked by anyone | 10 | Vertical list | — |
 
-- All five sections load concurrently
+Favorites and Recently Played are loaded from local storage and appear immediately, before network data loads.
+
+- All five network sections load concurrently
 - Loading spinner until data arrives; error view with retry on failure
 - Previously loaded data preserved on error
 - Pull-to-refresh reloads all sections
@@ -289,7 +293,7 @@ Allows HTTP (non-HTTPS) for media streams only via `NSAllowsArbitraryLoadsForMed
 
 When a station is playing, display:
 - **Title:** station name
-- **Artist:** country
+- **Artist:** flag emoji + country name (e.g. "🇫🇷 France")
 - **Album:** first 3 tags, comma-separated
 - **Live stream:** yes (hides seek bar)
 - **Playback rate:** 1.0 when playing, 0.0 when paused

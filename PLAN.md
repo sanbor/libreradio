@@ -703,6 +703,8 @@ actor ImageCacheService {
 ```swift
 @MainActor
 final class DiscoverViewModel: ObservableObject {
+    @Published var favoriteStations: [StationDTO] = []   // From FavoritesService (local)
+    @Published var recentStations: [StationDTO] = []     // From HistoryService (local, limit 10)
     @Published var localStations: [StationDTO] = []
     @Published var topByClicks: [StationDTO] = []
     @Published var topByVotes: [StationDTO] = []
@@ -711,8 +713,11 @@ final class DiscoverViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var error: AppError?
 
+    // Injected: RadioBrowserService, StationCacheService, FavoritesService, HistoryService
+
     func load() async
-    // Uses async let for concurrent fetches:
+    // Loads favorites + recents from local storage immediately (no network needed)
+    // Then uses async let for concurrent network fetches:
     //   localCountry = Locale.current.region?.identifier ?? "US"
     //   async let local = service.fetchLocalStations(countrycode: localCountry, limit: 20)
     //   async let clicks = service.fetchTopByClicks(limit: 20)
@@ -1206,6 +1211,10 @@ struct RadioLibreApp: App {
 - **`Date.relativeDescription`** extension uses `RelativeDateTimeFormatter` with `.short` style (e.g. "2 hr. ago").
 - **`await` inside `XCTAssertEqual` autoclosures causes compiler errors** — must extract the async result to a local variable first, then assert on it.
 - **`RecentStationsView` uses its own `RecentStationRow`** (private struct) instead of `StationRowView` because history rows need relative timestamps instead of tags, and the data source is `HistoryEntry` not `StationDTO`.
+
+**Implementation notes (Discover — Favorites & Recents sections):**
+- **Duplicate `StationDTO.id` in ForEach:** `HistoryEntry` has a unique `id: UUID`, but `toStationDTO()` produces a `StationDTO` whose `id` is `stationuuid`. If the same station appears multiple times in history (played >30 min apart), the carousel's `ForEach` gets duplicate IDs, causing SwiftUI rendering bugs (missing images, skipped views). Fix: deduplicate by `stationuuid` when converting history entries to `StationDTO` in `DiscoverViewModel.loadLocalData()`. This is a general pitfall whenever converting `HistoryEntry` arrays to `[StationDTO]` for use in `ForEach` — always deduplicate first.
+- **Favorites and recents load from local storage** (no network needed), so they appear immediately before API data arrives. This gives the Discover screen instant content even on slow connections.
 
 **Implementation notes (Build Fix):**
 - **Missing shared scheme:** XcodeGen was not generating a shared `.xcscheme` file because `project.yml` had no `schemes:` section. Without a shared scheme, `xcodebuild -scheme RadioLibre` fails with "Supported platforms for the buildables in the current scheme is empty." Fix: add an explicit `schemes:` block to `project.yml` with build targets and test targets.

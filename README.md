@@ -2,7 +2,7 @@
 
 # RadioLibre
 
-Native iOS internet radio player powered by the [Radio Browser](https://www.radio-browser.info/) community database (30,000+ stations).
+Zero ads, zero trackers, free software internet radio player for iOS powered by [Radio Browser](https://www.radio-browser.info/) community database (30,000+ stations).
 iOS counterpart to [RadioDroid](https://github.com/segler-alex/RadioDroid) (Android).
 
 - iOS 16+, SwiftUI, no third-party dependencies
