@@ -240,11 +240,11 @@ Automatic record of played stations, shown in the **Recent** tab.
 
 | Action | Behavior |
 |---|---|
-| Play station | Buffer stream → start playback → update now-playing → track click |
+| Play station | Buffer stream → start playback → update Live Activity → track click. Records `lastPlayedStation` for resume after stop. |
 | Pause | Stop streaming (live radio, so pause = stop) |
-| Resume | Reconnect to live stream (equivalent to re-play) |
-| Stop | Return to idle, clear everything |
-| Toggle | Pause if playing, resume if paused |
+| Resume | Reconnect to live stream (equivalent to re-play). Falls back to `lastPlayedStation` when `currentStation` is nil (after stop). |
+| Stop | Return to idle, clear everything. `lastPlayedStation` is preserved for later resume. |
+| Toggle | Pause if playing, resume if paused. From idle: replays `lastPlayedStation` if available. |
 
 ### Stream Buffering
 
@@ -289,19 +289,37 @@ Allows HTTP (non-HTTPS) for media streams only via `NSAllowsArbitraryLoadsForMed
 
 ---
 
-## Now Playing (Lock Screen & Control Center)
+## Lock Screen & Control Center
 
-When a station is playing, display:
-- **Title:** station name
-- **Artist:** flag emoji + country name (e.g. "🇫🇷 France")
-- **Album:** first 3 tags, comma-separated
-- **Live stream:** yes (hides seek bar)
-- **Playback rate:** 1.0 when playing, 0.0 when paused
-- **Artwork:** station favicon, loaded asynchronously (display info immediately, update artwork when loaded)
+### Live Activity (iOS 16.2+)
 
-When playback stops, clear all info.
+The Live Activity is the sole lock screen element — `MPNowPlayingInfoCenter.nowPlayingInfo` is intentionally not set to avoid duplicate overlapping widgets. The `updateNowPlaying()` method is a no-op.
+
+**Lock screen banner** shows:
+- Flag emoji + station name (headline)
+- Country name, codec, bitrate (secondary metadata)
+- Play/pause and stop buttons (iOS 17+ via `LiveActivityIntent`; static state icon on iOS 16.2)
+
+**Dynamic Island** shows:
+- Expanded: station name (leading), playback controls (trailing), flag + country + codec + bitrate (bottom)
+- Compact: radio icon (leading), state icon (trailing)
+- Minimal: radio icon
+
+**Lifecycle:**
+- Started on play, updated on state changes
+- Ended with `.immediate` dismissal policy on stop (prevents stale banners)
+- On app launch, orphaned activities from previous sessions are ended immediately
+- On app restart, existing activities are recovered from `Activity<RadioActivityAttributes>.activities` before creating new ones (prevents duplicates)
+
+**ContentState:** station name, codec, bitrate label, flag emoji, country name, isPlaying, isLoading, isBuffering.
+
+**Playback controls** (iOS 17+): `TogglePlaybackIntent` and `StopPlaybackIntent` conform to `LiveActivityIntent`. They call `RadioPlaybackAction` closures (wired to `AudioPlayerService` at launch), which run in the main app process. Shared source files in `Shared/` are compiled into both the app and widget extension targets.
+
+**Caveat:** CarPlay's `CPNowPlayingTemplate` reads from `nowPlayingInfo`, so the CarPlay Now Playing tab shows blank metadata. Station lists and playback still work. Can be addressed separately.
 
 ### Remote Commands
+
+Remote commands still work via `MPRemoteCommandCenter` (command routing is based on active audio session, not `nowPlayingInfo`).
 
 | Button | Action |
 |---|---|

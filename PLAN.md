@@ -31,7 +31,7 @@
 | Full-text search | Search with filters | `/json/stations/search` with name, tag, country, language, codec, bitrate filters |
 | Stream playback | ExoPlayer/MediaPlayer | `AVPlayer` with HLS + progressive streams |
 | Background audio | Foreground service | `AVAudioSession.playback` + `UIBackgroundModes: audio` |
-| Lock screen controls | MediaSession + notification | `MPNowPlayingInfoCenter` + `MPRemoteCommandCenter` |
+| Lock screen controls | MediaSession + notification | Live Activity (iOS 16.2+) with `LiveActivityIntent` buttons (iOS 17+) + `MPRemoteCommandCenter` |
 | Now playing metadata | ICY metadata extraction | AVPlayer metadata observation |
 | Favorites | SharedPreferences JSON | SwiftData `FavoriteStation` model |
 | Favorites reordering | Drag-and-drop | SwiftUI `List` with `.onMove` |
@@ -58,6 +58,7 @@
 | Equalizer | System equalizer intent | N/A (iOS has no system EQ API) |
 | Server statistics | Stats view | `/json/stats` |
 | ~~CarPlay~~ | ~~Android Auto MediaBrowserService~~ | ~~`CPTemplate` integration~~ — **Done (Phase 8)** |
+| ~~Live Activity~~ | ~~N/A~~ | ~~ActivityKit lock screen banner + Dynamic Island~~ — **Done (Phase 9)** |
 | Widgets | N/A | WidgetKit for now-playing + favorites |
 | Siri Shortcuts | N/A | `AppIntent` for "Play [station name]" |
 | Metered connection warning | Dialog before playback on mobile | `NWPathMonitor` check for `.constrained` |
@@ -263,9 +264,13 @@ One vote per IP per station per 10 minutes. Returns:
 ```
 RadioLibre/
 ├── RadioLibre.xcodeproj/
+├── Shared/                                      # Compiled into both RadioLibre and RadioLibreActivity targets
+│   ├── RadioPlaybackAction.swift                # Closure-based dispatch for cross-target playback control
+│   ├── TogglePlaybackIntent.swift               # LiveActivityIntent: toggle play/pause (iOS 17+)
+│   └── StopPlaybackIntent.swift                 # LiveActivityIntent: stop playback (iOS 17+)
 ├── RadioLibre/
 │   ├── App/
-│   │   ├── RadioLibreApp.swift                 # @main, SwiftData container, environment setup
+│   │   ├── RadioLibreApp.swift                 # @main, SwiftData container, environment setup, RadioPlaybackAction wiring
 │   │   └── Info.plist                          # Background modes, ATS exceptions, CarPlay scene
 │   │
 │   ├── CarPlay/
@@ -279,6 +284,7 @@ RadioLibre/
 │   │   ├── ClickResponse.swift                 # Codable: /json/url response
 │   │   ├── VoteResponse.swift                  # Codable: /json/vote response
 │   │   ├── ServerStats.swift                   # Codable: /json/stats response
+│   │   ├── RadioActivityAttributes.swift       # ActivityKit attributes + ContentState (shared with widget extension)
 │   │   ├── FavoriteStation.swift               # SwiftData @Model
 │   │   ├── HistoryEntry.swift                  # Codable struct, UserDefaults persistence
 │   │   └── AppError.swift                      # Typed error enum
@@ -287,7 +293,8 @@ RadioLibre/
 │   │   ├── ServerDiscoveryService.swift         # DNS-based server discovery + rotation + caching
 │   │   ├── RadioBrowserService.swift            # All API calls (actor)
 │   │   ├── AudioPlayerService.swift             # AVPlayer wrapper, playback state machine
-│   │   ├── NowPlayingService.swift              # MPNowPlayingInfoCenter + MPRemoteCommandCenter
+│   │   ├── NowPlayingService.swift              # MPRemoteCommandCenter only (nowPlayingInfo disabled)
+│   │   ├── LiveActivityService.swift            # ActivityKit Live Activity lifecycle management
 │   │   ├── HistoryService.swift                 # Actor: play history persistence + dedup + limit
 │   │   └── ImageCacheService.swift              # NSCache + disk cache for favicons
 │   │
@@ -351,6 +358,10 @@ RadioLibre/
 │       │   ├── AccentColor.colorset/
 │       │   └── Colors/
 │       └── Localizable.xcstrings                # All user-facing strings
+│
+├── RadioLibreActivity/                          # Widget extension (iOS 16.2+)
+│   ├── Info.plist
+│   └── RadioLiveActivityWidget.swift            # Lock screen banner + Dynamic Island + playback controls
 │
 └── RadioLibreTests/
     ├── Services/
@@ -591,12 +602,15 @@ final class AudioPlayerService: ObservableObject {
     var isPlaying: Bool { ... }
     var isLoading: Bool { ... }
 
+    // Remembers the last station played, survives stop()
+    private(set) var lastPlayedStation: StationDTO?
+
     // --- Public API ---
-    func play(station: StationDTO)
+    func play(station: StationDTO)        // sets lastPlayedStation
     func pause()                          // stops stream (radio is live)
-    func resume()                         // reconnects to stream
-    func stop()                           // returns to .idle
-    func togglePlayPause()
+    func resume()                         // reconnects; falls back to lastPlayedStation when currentStation is nil
+    func stop()                           // returns to .idle; lastPlayedStation preserved
+    func togglePlayPause()               // from .idle: replays lastPlayedStation if available
 
     // --- Internal ---
     private let player = AVPlayer()
@@ -661,23 +675,44 @@ final class NowPlayingService {
     //   - pauseCommand → audioService.pause()
     //   - stopCommand → audioService.stop()
     //   - togglePlayPauseCommand → audioService.togglePlayPause()
-    //   - nextTrackCommand → play next favorite (optional)
-    //   - previousTrackCommand → play previous favorite (optional)
+    //   - nextTrackCommand → play next favorite
+    //   - previousTrackCommand → play previous favorite
 
     func updateNowPlaying(station: StationDTO, isPlaying: Bool)
-    // Sets MPNowPlayingInfoCenter.default().nowPlayingInfo:
-    //   MPMediaItemPropertyTitle: station.name
-    //   MPMediaItemPropertyArtist: station.country ?? ""
-    //   MPMediaItemPropertyAlbumTitle: station.tagList.prefix(3).joined(separator: ", ")
-    //   MPNowPlayingInfoPropertyIsLiveStream: true   // hides seek bar
-    //   MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
-    //   MPMediaItemPropertyArtwork: fetched async from station.favicon
+    // NO-OP: nowPlayingInfo is intentionally not set.
+    // Live Activity is the sole lock screen element — setting nowPlayingInfo
+    // would create a duplicate Now Playing widget overlapping the Live Activity.
+    // Remote commands still work via MPRemoteCommandCenter (command routing
+    // is based on active audio session, not nowPlayingInfo).
+    // Caveat: CarPlay's CPNowPlayingTemplate reads from nowPlayingInfo,
+    // so the CarPlay Now Playing tab shows blank metadata.
 
     func clearNowPlaying()
+    // Clears MPNowPlayingInfoCenter.default().nowPlayingInfo
 }
 ```
 
-**Important:** Set `MPNowPlayingInfoPropertyIsLiveStream: true` to prevent the seek bar from appearing on the lock screen.
+#### `LiveActivityService.swift`
+
+```swift
+@MainActor
+final class LiveActivityService {
+    static let shared = LiveActivityService()
+
+    func startOrUpdate(station: StationDTO, isPlaying: Bool, isLoading: Bool, isBuffering: Bool)
+    // Creates or updates a Live Activity with RadioActivityAttributes.ContentState.
+    // On app restart, recovers existing activities from Activity<RadioActivityAttributes>.activities
+    // before creating new ones (prevents duplicates).
+
+    func end()
+    // Ends the current activity with .immediate dismissal policy.
+    // (.default keeps it visible for hours, causing duplicates on next play)
+
+    func endOrphanedActivities()
+    // Ends all RadioActivityAttributes activities with .immediate dismissal.
+    // Called on app launch to clean up stale activities from previous sessions.
+}
+```
 
 #### `ImageCacheService.swift`
 
@@ -1043,7 +1078,14 @@ struct RadioLibreApp: App {
                 .environmentObject(playerVM)
                 .environmentObject(favoritesVM)
                 .modelContainer(for: [FavoriteStation.self, HistoryEntry.self])
-                .task { await ServerDiscoveryService.shared.resolveIfNeeded() }
+                .task {
+                    // Wire Live Activity intent closures to AudioPlayerService
+                    RadioPlaybackAction.togglePlayPause = { AudioPlayerService.shared.togglePlayPause() }
+                    RadioPlaybackAction.stop = { AudioPlayerService.shared.stop() }
+                    // ...
+                    LiveActivityService.shared.endOrphanedActivities()
+                    await ServerDiscoveryService.shared.resolveIfNeeded()
+                }
         }
     }
 }
@@ -1079,11 +1121,12 @@ struct RadioLibreApp: App {
 - AVPlayer continues automatically in background once session is configured
 
 ### Lock Screen & Control Center
-- `MPRemoteCommandCenter` handlers registered once at app start
+- **Live Activity** (iOS 16.2+) is the sole lock screen element — `nowPlayingInfo` is intentionally not set to avoid duplicate widgets
+- `MPRemoteCommandCenter` handlers registered once at app start — commands still work via active audio session
 - Commands: `playCommand`, `pauseCommand`, `stopCommand`, `togglePlayPauseCommand`, `nextTrackCommand`, `previousTrackCommand`
-- `MPNowPlayingInfoCenter` updated on every state change
-- `MPNowPlayingInfoPropertyIsLiveStream = true` prevents scrubber
-- Artwork loaded async — update nowPlayingInfo without artwork first, then again with artwork
+- Live Activity playback controls (iOS 17+): `TogglePlaybackIntent` and `StopPlaybackIntent` (`LiveActivityIntent` conformers in `Shared/`) call `RadioPlaybackAction` closures wired at launch
+- `RadioActivityAttributes.ContentState` carries: station name, codec, bitrate, flag emoji, country name, playback state flags
+- Activities ended with `.immediate` dismissal to prevent stale banners; orphaned activities cleaned up on launch
 
 ### AirPlay
 - `AVRoutePickerView` (UIKit, wrapped in UIViewRepresentable) provides native AirPlay button
@@ -1288,13 +1331,32 @@ struct RadioLibreApp: App {
 - **4 tabs:** Favorites → Recent → Popular → Now Playing. CarPlay allows max 4–5 tabs; Now Playing is required by Apple HIG for audio apps.
 - **`PlayerViewModel.shared`** (not `AudioPlayerService` directly): `play(station:)` records history, keeping the Recent tab accurate. Same approach as the phone UI.
 - **Reload on tab select + scene active:** No Combine observers or NotificationCenter. Data sets are small, service calls are fast. Standard CarPlay pattern.
-- **`CPNowPlayingTemplate` reads from `MPNowPlayingInfoCenter` automatically** — `NowPlayingService` already configures this, so zero additional work.
+- **`CPNowPlayingTemplate` reads from `MPNowPlayingInfoCenter`** — since `nowPlayingInfo` is no longer set (Live Activity replaced it), the CarPlay Now Playing tab shows blank metadata. Station lists and playback still work. Can be addressed separately by conditionally setting `nowPlayingInfo` when a CarPlay scene is connected.
 - **Image loading:** Sync memory cache via `ImageCacheService.cachedImage(for:)` at init, then async-load via `ImageCacheService.image(for:)` and call `listItem.setImage()` when ready. Placeholder: SF Symbol `radio`.
 - **`didDisconnect` in extension:** Moved to an extension to silence a compiler warning about nearly matching an unrelated optional protocol requirement.
 - **Entitlement note:** `com.apple.developer.carplay-audio` is required when code signing is enabled. Currently `CODE_SIGNING_ALLOWED: "NO"`, so no entitlements file is needed.
 - **No availability checks needed:** CPTemplate APIs available since iOS 14, app targets iOS 16.
 
 **Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all existing tests pass, CarPlay Simulator shows tabs with station lists.
+
+### Phase 9: Live Activity
+**Goal:** Single, clean lock screen element with interactive controls. Replaces overlapping Now Playing widget.
+
+1. Disable `NowPlayingService.updateNowPlaying()` — no longer sets `nowPlayingInfo` (Live Activity is the sole lock screen element)
+2. Fix duplicate Live Activities: `.immediate` dismissal policy, recover existing activities on app restart
+3. Fix play after stop: `lastPlayedStation` property in `AudioPlayerService`, `resume()` and `togglePlayPause()` fall back to it
+4. Add `countryName` to `RadioActivityAttributes.ContentState`, display in lock screen banner and Dynamic Island
+5. Add `LiveActivityIntent` playback controls (iOS 17+): `TogglePlaybackIntent`, `StopPlaybackIntent` in `Shared/` directory, `RadioPlaybackAction` closure-based dispatch, `Button(intent:)` in widget
+6. Update `project.yml` to include `Shared/` in both app and widget extension targets
+7. Wire `RadioPlaybackAction` closures in `RadioLibreApp.swift`
+8. Update all tests: `NowPlayingServiceTests` (verify no-op), `RadioActivityAttributesTests` + `LiveActivityServiceTests` (add `countryName`), `AudioPlayerServiceTests` (test `lastPlayedStation`, resume after stop, toggle from idle)
+
+**Implementation notes (Phase 9):**
+- **`Shared/` directory pattern:** Intent types and `RadioPlaybackAction` must be compiled in both the main app and widget extension. `LiveActivityIntent.perform()` runs in the main app process, not the widget extension, so closures are set in the app and called by the intent.
+- **iOS 16.2 fallback:** `Button(intent:)` requires iOS 17. On iOS 16.2, the widget falls back to static state icons (waveform/pause/ellipsis).
+- **CarPlay caveat:** `CPNowPlayingTemplate` reads from `nowPlayingInfo`. Since it's no longer set, CarPlay Now Playing tab shows blank metadata. Station lists and playback still work.
+
+**Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 318 tests pass. Manual: only Live Activity on lock screen, no duplicates, play resumes after stop, country name displays correctly, buttons work on iOS 17+.
 
 ---
 
