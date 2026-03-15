@@ -42,6 +42,7 @@ final class AudioPlayerServiceTests: XCTestCase {
     func testInitialStateIsIdle() {
         XCTAssertEqual(service.state, .idle)
         XCTAssertNil(service.currentStation)
+        XCTAssertNil(service.lastPlayedStation)
         XCTAssertFalse(service.isPlaying)
         XCTAssertFalse(service.isLoading)
     }
@@ -139,11 +140,6 @@ final class AudioPlayerServiceTests: XCTestCase {
         XCTAssertTrue(service.isLoading)
     }
 
-    func testToggleFromIdleDoesNothing() {
-        service.togglePlayPause()
-        XCTAssertEqual(service.state, .idle)
-    }
-
     func testToggleFromErrorResumes() {
         let station = StationDTOTests.makeStation(
             uuid: "error-uuid",
@@ -234,8 +230,49 @@ final class AudioPlayerServiceTests: XCTestCase {
 
     // MARK: - Resume from Paused
 
-    func testResumeWhenIdleDoesNothing() {
+    func testResumeWhenIdleWithoutLastPlayedDoesNothing() {
         service.resume()
+        XCTAssertEqual(service.state, .idle)
+    }
+
+    func testResumeAfterStopUsesLastPlayedStation() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.stop()
+        XCTAssertEqual(service.state, .idle)
+        XCTAssertEqual(service.lastPlayedStation, station)
+
+        service.resume()
+        XCTAssertEqual(service.state, .loading(station: station))
+    }
+
+    // MARK: - Last Played Station
+
+    func testLastPlayedStationSetOnPlay() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        XCTAssertEqual(service.lastPlayedStation, station)
+    }
+
+    func testLastPlayedStationSurvivesStop() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.stop()
+        XCTAssertEqual(service.lastPlayedStation, station)
+    }
+
+    func testToggleFromIdleWithLastPlayedResumes() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.stop()
+        XCTAssertEqual(service.state, .idle)
+
+        service.togglePlayPause()
+        XCTAssertEqual(service.state, .loading(station: station))
+    }
+
+    func testToggleFromIdleWithoutLastPlayedDoesNothing() {
+        service.togglePlayPause()
         XCTAssertEqual(service.state, .idle)
     }
 

@@ -16,78 +16,20 @@ final class NowPlayingServiceTests: XCTestCase {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
-    // MARK: - updateNowPlaying
+    // MARK: - updateNowPlaying (disabled — Live Activity is the sole lock screen element)
 
-    func testUpdateNowPlayingSetsTitle() {
+    func testUpdateNowPlayingDoesNotSetInfo() {
         let station = StationDTOTests.makeStation(name: "Jazz FM")
         service.updateNowPlaying(station: station, isPlaying: true)
 
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPMediaItemPropertyTitle] as? String, "Jazz FM")
-    }
-
-    func testUpdateNowPlayingSetsArtistWithFlagAndCountry() {
-        let station = StationDTOTests.makeStation(country: "France", countrycode: "FR")
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPMediaItemPropertyArtist] as? String, "🇫🇷 France")
-    }
-
-    func testUpdateNowPlayingSetsArtistWithCountryOnly() {
-        let station = StationDTOTests.makeStation(country: "France")
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPMediaItemPropertyArtist] as? String, "France")
-    }
-
-    func testUpdateNowPlayingSetsArtistEmptyWhenNoCountry() {
-        let station = StationDTOTests.makeStation()
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPMediaItemPropertyArtist] as? String, "")
-    }
-
-    func testUpdateNowPlayingSetsAlbumFromTags() {
-        let station = StationDTOTests.makeStation(tags: "rock,jazz,blues,classical")
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        // prefix(3) of tagList joined by ", "
-        XCTAssertEqual(info?[MPMediaItemPropertyAlbumTitle] as? String, "rock, jazz, blues")
-    }
-
-    func testUpdateNowPlayingSetsLiveStream() {
-        let station = TestFixtures.makeStation()
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPNowPlayingInfoPropertyIsLiveStream] as? Bool, true)
-    }
-
-    func testUpdateNowPlayingIsPlayingSetsRateOne() {
-        let station = TestFixtures.makeStation()
-        service.updateNowPlaying(station: station, isPlaying: true)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 1.0)
-    }
-
-    func testUpdateNowPlayingNotPlayingSetsRateZero() {
-        let station = TestFixtures.makeStation()
-        service.updateNowPlaying(station: station, isPlaying: false)
-
-        let info = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        XCTAssertEqual(info?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 0.0)
+        XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
     }
 
     // MARK: - clearNowPlaying
 
     func testClearNowPlayingSetsInfoToNil() {
-        let station = TestFixtures.makeStation()
-        service.updateNowPlaying(station: station, isPlaying: true)
+        // Manually set info to verify clearNowPlaying clears it
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyTitle: "Test"]
         XCTAssertNotNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
 
         service.clearNowPlaying()

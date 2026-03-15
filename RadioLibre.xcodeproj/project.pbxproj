@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		01218FA986EFD1AE67ECB24C /* NowPlayingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3038AD506AAF90DDF1E7E500 /* NowPlayingServiceTests.swift */; };
 		03991A1D3551D106590EDF0A /* LanguageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6607B1A0B017F7774674F95D /* LanguageListView.swift */; };
+		066009BB3FE4A1BAAD5E46C8 /* TogglePlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 668D55295AE8EB70B772127A /* TogglePlaybackIntent.swift */; };
 		09E7EC4FC64E82873253D221 /* FavoritesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A86F473FFEE124759CC0A29 /* FavoritesViewModelTests.swift */; };
 		0ADC6A9C100BA52B4E6D0054 /* RecentStationsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036172999BA483A8068BDF2A /* RecentStationsViewModel.swift */; };
 		0BDE5AC99B30A09057FDDEE5 /* RadioActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB1CD19465C2FE055071D08 /* RadioActivityAttributes.swift */; };
@@ -35,6 +36,8 @@
 		3BFBA5C1219EB166A85A1A90 /* PlayerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70EB015681C9DCEA006C2A32 /* PlayerControlsView.swift */; };
 		3C9458A7F799B6F45AF9F9AE /* DiscoverViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2847C72127CDDC0DB8DE9A95 /* DiscoverViewModelTests.swift */; };
 		3C9ED7C9C13AE9D400FB9DC1 /* NowPlayingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C71831F40091A91ADEC326 /* NowPlayingService.swift */; };
+		3E9E25AD84381EC3003EAC8D /* StopPlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA427E86479C2D6F3F88DDBD /* StopPlaybackIntent.swift */; };
+		3EBB94F69C542B765189E33C /* StopPlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA427E86479C2D6F3F88DDBD /* StopPlaybackIntent.swift */; };
 		40914F34A1EEC10E95553724 /* StationCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C561D8D740FA2EBFA34EB215 /* StationCacheService.swift */; };
 		413C3B56012E4AA04C233DE9 /* RadioActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB1CD19465C2FE055071D08 /* RadioActivityAttributes.swift */; };
 		4392BAA907F88E2B59236692 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE24A9FB1535C1544283F624 /* FavoritesViewModel.swift */; };
@@ -65,12 +68,15 @@
 		8B497181854A1C898929BB97 /* RadioActivityAttributesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D7157638DCC7A83BA45FB4 /* RadioActivityAttributesTests.swift */; };
 		90C373C8E0890807662146DE /* BrowseViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23716DBE4FDCC7D6E2D077D /* BrowseViewModelTests.swift */; };
 		914C18B12B8BA40485021286 /* FavoritesServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B3BD296CD13095DCF3D7EB /* FavoritesServiceTests.swift */; };
+		92D57A01C006B638DCF82434 /* RadioPlaybackAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632E4DAC113A25277BC34EA7 /* RadioPlaybackAction.swift */; };
 		96B9B999ACDDEDC04AEEB23F /* StationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BEB35AD534FD32D3C8E543 /* StationCardView.swift */; };
 		972C92B9C79ABE4486E725D6 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE5EEBB0C5968EEFCAA6B0E /* FavoritesView.swift */; };
 		9E5535014C67672D4354B2A5 /* HistoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC013AC260B200896B311D5 /* HistoryServiceTests.swift */; };
 		A1BBED41CF18FE3F39540FC8 /* FavoritesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A40AA4F0AD246CE671AA689 /* FavoritesService.swift */; };
 		A280C8D54B7C1DB66EF30768 /* RadioLibreActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 509D53E7CA1037EA29A1EDA5 /* RadioLibreActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A4406674F5DD60DAEC405458 /* TogglePlaybackIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 668D55295AE8EB70B772127A /* TogglePlaybackIntent.swift */; };
 		A736E886FE50B967A4DE61BC /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058909C27A4677C163E35084 /* ErrorView.swift */; };
+		A797347A75639C23C6157103 /* RadioPlaybackAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632E4DAC113A25277BC34EA7 /* RadioPlaybackAction.swift */; };
 		AD00C7B91354C5B7DA0851A0 /* BrowseSortOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3A03BD7D598F30578F7A7A5 /* BrowseSortOrder.swift */; };
 		AD927B61A02965AFBE254BD4 /* RadioLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4CE8DC76D43365CF582CD2 /* RadioLiveActivityWidget.swift */; };
 		B08080EBA0EEFD8DFD2BF449 /* AppErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A752136A0810EDCAFFEA4B91 /* AppErrorTests.swift */; };
@@ -174,8 +180,10 @@
 		5FE5EEBB0C5968EEFCAA6B0E /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		618DF0093181EA8EB3028825 /* AlphabetIndexView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetIndexView.swift; sourceTree = "<group>"; };
 		62E2077974D7A2297C57D775 /* RadioBrowserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioBrowserService.swift; sourceTree = "<group>"; };
+		632E4DAC113A25277BC34EA7 /* RadioPlaybackAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioPlaybackAction.swift; sourceTree = "<group>"; };
 		6607B1A0B017F7774674F95D /* LanguageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageListView.swift; sourceTree = "<group>"; };
 		6656D10F02B7873C6C79B105 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		668D55295AE8EB70B772127A /* TogglePlaybackIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePlaybackIntent.swift; sourceTree = "<group>"; };
 		678F33B96A4151D5E6C4A5F5 /* RecentStationsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentStationsViewModelTests.swift; sourceTree = "<group>"; };
 		6AB44F8A8036A30426B0546B /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
 		6E174624D0348300DD545D35 /* StationDTOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationDTOTests.swift; sourceTree = "<group>"; };
@@ -210,6 +218,7 @@
 		BE24A9FB1535C1544283F624 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
 		C561D8D740FA2EBFA34EB215 /* StationCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationCacheService.swift; sourceTree = "<group>"; };
 		C86A7FAD65113DC0F216C187 /* StationListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationListViewModel.swift; sourceTree = "<group>"; };
+		CA427E86479C2D6F3F88DDBD /* StopPlaybackIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopPlaybackIntent.swift; sourceTree = "<group>"; };
 		CF537AE4219C196942D39F15 /* BrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseView.swift; sourceTree = "<group>"; };
 		D09CC8854D98690878807E8B /* String+CountryFlag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CountryFlag.swift"; sourceTree = "<group>"; };
 		D1B5D6ED75DAFD3D183A13FE /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
@@ -274,6 +283,7 @@
 				4EAF5A50BB867D105D02ABAB /* RadioLibre */,
 				48EF91FF547BA97C1B1E4E89 /* RadioLibreActivity */,
 				BEA0035312F700F6487021D9 /* RadioLibreTests */,
+				B9BFBFEF1D44C288E8493EFB /* Shared */,
 				48D916BE8A95292104D22AA0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -398,6 +408,16 @@
 				9380A23EA815CB9037FE4D94 /* VoteResponse.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		B9BFBFEF1D44C288E8493EFB /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				632E4DAC113A25277BC34EA7 /* RadioPlaybackAction.swift */,
+				CA427E86479C2D6F3F88DDBD /* StopPlaybackIntent.swift */,
+				668D55295AE8EB70B772127A /* TogglePlaybackIntent.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		BBCD1E1B56E55248AD13713E /* ViewModels */ = {
@@ -643,6 +663,9 @@
 			files = (
 				413C3B56012E4AA04C233DE9 /* RadioActivityAttributes.swift in Sources */,
 				AD927B61A02965AFBE254BD4 /* RadioLiveActivityWidget.swift in Sources */,
+				92D57A01C006B638DCF82434 /* RadioPlaybackAction.swift in Sources */,
+				3EBB94F69C542B765189E33C /* StopPlaybackIntent.swift in Sources */,
+				A4406674F5DD60DAEC405458 /* TogglePlaybackIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -721,6 +744,7 @@
 				0BDE5AC99B30A09057FDDEE5 /* RadioActivityAttributes.swift in Sources */,
 				76DD3E814CEA4567B3F0BAE0 /* RadioBrowserService.swift in Sources */,
 				2E520977399172EC1261594C /* RadioLibreApp.swift in Sources */,
+				A797347A75639C23C6157103 /* RadioPlaybackAction.swift in Sources */,
 				D0BC114D2EA31FA4C83B7135 /* RecentStationsView.swift in Sources */,
 				0ADC6A9C100BA52B4E6D0054 /* RecentStationsViewModel.swift in Sources */,
 				DF8CAB02F93D7B7A735E775D /* RootTabView.swift in Sources */,
@@ -737,10 +761,12 @@
 				4C9C6EAD57B2A77E0DBF2B76 /* StationListView.swift in Sources */,
 				E3211FEEE5378A8B8759ECEA /* StationListViewModel.swift in Sources */,
 				B80C18203A75084DF6880926 /* StationRowView.swift in Sources */,
+				3E9E25AD84381EC3003EAC8D /* StopPlaybackIntent.swift in Sources */,
 				2AA985E98770122648FCBE1E /* String+CountryFlag.swift in Sources */,
 				473F8EF5B16C230E725C5721 /* Tag.swift in Sources */,
 				46B6CF2FE6E32069C0BCB735 /* TagChipView.swift in Sources */,
 				618BDB5B01F7D81942C26DE1 /* TagListView.swift in Sources */,
+				066009BB3FE4A1BAAD5E46C8 /* TogglePlaybackIntent.swift in Sources */,
 				D7D59E52991CAA3E17EB10CF /* VoteResponse.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

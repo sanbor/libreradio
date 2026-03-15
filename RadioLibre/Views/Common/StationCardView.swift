@@ -6,7 +6,7 @@ struct StationCardView: View {
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 FaviconImageView(url: station.faviconURL, size: 64)
 
                 Text(station.name)
@@ -28,9 +28,9 @@ struct StationCardView: View {
                     }
                 }
             }
-            .frame(width: 120)
-            .padding(.vertical, 10)
-            .padding(.horizontal, 8)
+            .frame(width: 130)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 10)
             .background(Color(.systemGray6))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }

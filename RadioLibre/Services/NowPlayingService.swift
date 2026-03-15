@@ -23,24 +23,8 @@ final class NowPlayingService {
     // MARK: - Now Playing Info
 
     func updateNowPlaying(station: StationDTO, isPlaying: Bool) {
-        var info = [String: Any]()
-        info[MPMediaItemPropertyTitle] = station.name
-        var artistParts: [String] = []
-        if let flag = station.flagEmoji { artistParts.append(flag) }
-        if let country = station.country, !country.isEmpty { artistParts.append(country) }
-        info[MPMediaItemPropertyArtist] = artistParts.joined(separator: " ")
-        info[MPMediaItemPropertyAlbumTitle] = station.tagList.prefix(3).joined(separator: ", ")
-        info[MPNowPlayingInfoPropertyIsLiveStream] = true
-        info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-
-        // Load artwork asynchronously
-        if let faviconURL = station.faviconURL {
-            Task {
-                await loadArtwork(from: faviconURL, for: station)
-            }
-        }
+        // Disabled: Live Activity is the sole lock screen element.
+        // Remote commands still work via MPRemoteCommandCenter.
     }
 
     func clearNowPlaying() {
@@ -93,17 +77,4 @@ final class NowPlayingService {
         }
     }
 
-    // MARK: - Artwork
-
-    private func loadArtwork(from url: URL, for station: StationDTO) async {
-        guard let image = await ImageCacheService.shared.image(for: url) else { return }
-
-        let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-
-        // Update existing info with artwork
-        if var info = MPNowPlayingInfoCenter.default().nowPlayingInfo {
-            info[MPMediaItemPropertyArtwork] = artwork
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-        }
-    }
 }

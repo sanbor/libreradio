@@ -13,6 +13,8 @@ struct RadioLibreApp: App {
                 .environmentObject(favoritesVM)
                 .environmentObject(networkMonitor)
                 .task {
+                    RadioPlaybackAction.togglePlayPause = { AudioPlayerService.shared.togglePlayPause() }
+                    RadioPlaybackAction.stop = { AudioPlayerService.shared.stop() }
                     NowPlayingService.shared.setAudioService(playerVM.audioService)
                     NowPlayingService.shared.setPlayerViewModel(playerVM)
                     LiveActivityService.shared.endOrphanedActivities()

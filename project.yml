@@ -28,6 +28,7 @@ targets:
     platform: iOS
     sources:
       - RadioLibre
+      - Shared
     dependencies:
       - target: RadioLibreActivity
     settings:
@@ -80,6 +81,7 @@ targets:
     sources:
       - RadioLibreActivity
       - path: RadioLibre/Models/RadioActivityAttributes.swift
+      - Shared
     settings:
       base:
         INFOPLIST_FILE: RadioLibreActivity/Info.plist

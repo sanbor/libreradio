@@ -61,6 +61,8 @@ final class AudioPlayerService: ObservableObject {
 
     @Published private(set) var isBuffering: Bool = false
 
+    private(set) var lastPlayedStation: StationDTO?
+
     // MARK: - Private
 
     private static let initialBufferDuration: TimeInterval = 3.0
@@ -100,6 +102,8 @@ final class AudioPlayerService: ObservableObject {
     // MARK: - Public API
 
     func play(station: StationDTO) {
+        lastPlayedStation = station
+
         guard let streamURL = station.streamURL else {
             state = .error(station: station, message: AppError.streamURLInvalid.errorDescription ?? "Invalid stream URL")
             return
@@ -151,7 +155,7 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func resume() {
-        guard let station = currentStation else { return }
+        guard let station = currentStation ?? lastPlayedStation else { return }
         // For live radio, resume = reconnect to stream
         play(station: station)
     }
@@ -181,6 +185,10 @@ final class AudioPlayerService: ObservableObject {
             resume()
         case .error:
             resume()
+        case .idle:
+            if let station = lastPlayedStation {
+                play(station: station)
+            }
         default:
             break
         }

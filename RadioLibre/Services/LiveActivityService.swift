@@ -17,6 +17,7 @@ final class LiveActivityService {
             codec: station.codec,
             bitrateLabel: station.bitrateLabel,
             flagEmoji: station.flagEmoji,
+            countryName: station.country,
             isPlaying: isPlaying,
             isLoading: isLoading,
             isBuffering: isBuffering
@@ -25,6 +26,14 @@ final class LiveActivityService {
         if let activity = currentActivity as? Activity<RadioActivityAttributes> {
             Task {
                 await activity.update(
+                    ActivityContent(state: state, staleDate: Date().addingTimeInterval(15 * 60))
+                )
+            }
+        } else if let existing = Activity<RadioActivityAttributes>.activities.first {
+            // Recover reference after app restart
+            currentActivity = existing
+            Task {
+                await existing.update(
                     ActivityContent(state: state, staleDate: Date().addingTimeInterval(15 * 60))
                 )
             }
@@ -47,7 +56,7 @@ final class LiveActivityService {
         guard let activity = currentActivity as? Activity<RadioActivityAttributes> else { return }
 
         Task {
-            await activity.end(nil, dismissalPolicy: .default)
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
         currentActivity = nil
     }
@@ -57,7 +66,7 @@ final class LiveActivityService {
 
         Task {
             for activity in Activity<RadioActivityAttributes>.activities {
-                await activity.end(nil, dismissalPolicy: .default)
+                await activity.end(nil, dismissalPolicy: .immediate)
             }
         }
     }

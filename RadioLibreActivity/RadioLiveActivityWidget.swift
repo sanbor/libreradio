@@ -21,14 +21,18 @@ struct RadioLiveActivityWidget: Widget {
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    stateIcon(context: context)
-                        .font(.title2)
+                    playbackControls(context: context)
                 }
 
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 8) {
                         if let flag = context.state.flagEmoji {
                             Text(flag)
+                        }
+                        if let countryName = context.state.countryName {
+                            Text(countryName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                         if let codec = context.state.codec {
                             Text(codec)
@@ -68,6 +72,9 @@ struct RadioLiveActivityWidget: Widget {
                 }
 
                 HStack(spacing: 6) {
+                    if let countryName = context.state.countryName {
+                        Text(countryName)
+                    }
                     if let codec = context.state.codec {
                         Text(codec)
                     }
@@ -79,10 +86,43 @@ struct RadioLiveActivityWidget: Widget {
 
             Spacer()
 
+            playbackControls(context: context)
+        }
+        .padding()
+    }
+
+    // MARK: - Playback Controls
+
+    @ViewBuilder
+    private func playbackControls(context: ActivityViewContext<RadioActivityAttributes>) -> some View {
+        if #available(iOS 17.0, *) {
+            HStack(spacing: 12) {
+                Button(intent: TogglePlaybackIntent()) {
+                    playPauseIcon(context: context)
+                }
+                Button(intent: StopPlaybackIntent()) {
+                    Image(systemName: "stop.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .font(.title2)
+        } else {
             stateIcon(context: context)
                 .font(.title2)
         }
-        .padding()
+    }
+
+    @ViewBuilder
+    private func playPauseIcon(context: ActivityViewContext<RadioActivityAttributes>) -> some View {
+        if context.state.isLoading || context.state.isBuffering {
+            Image(systemName: "ellipsis")
+        } else if context.state.isPlaying {
+            Image(systemName: "pause.fill")
+                .foregroundStyle(.cyan)
+        } else {
+            Image(systemName: "play.fill")
+                .foregroundStyle(.cyan)
+        }
     }
 
     // MARK: - Helpers
