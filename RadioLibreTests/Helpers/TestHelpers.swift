@@ -8,9 +8,9 @@ enum TestFixtures {
         url: String = "http://stream.test/live",
         urlResolved: String = "http://stream.test/resolved",
         tags: String = "rock,pop",
-        country: String = "Germany",
-        countrycode: String = "DE",
-        state: String = "Berlin",
+        country: String = "Argentina",
+        countrycode: String = "AR",
+        state: String = "Buenos Aires",
         codec: String = "MP3",
         bitrate: Int = 128
     ) -> String {
@@ -73,8 +73,8 @@ enum TestFixtures {
     }
 
     static func makeCountry(
-        name: String = "Germany",
-        iso3166: String = "DE",
+        name: String = "Argentina",
+        iso3166: String = "AR",
         stationcount: Int = 500
     ) -> Country {
         Country(name: name, iso_3166_1: iso3166, stationcount: stationcount)

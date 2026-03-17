@@ -16,7 +16,7 @@ struct StationCardView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
 
-                if let country = station.country, !country.isEmpty {
+                if let country = station.countryDisplayName, !country.isEmpty {
                     HStack(spacing: 2) {
                         if let flag = station.flagEmoji {
                             Text(flag).font(.caption2)

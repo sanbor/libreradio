@@ -31,13 +31,13 @@ final class StationCacheServiceTests: XCTestCase {
     }
 
     func testSaveAndLoadCountries() async {
-        let countries = [TestFixtures.makeCountry(name: "Germany"), TestFixtures.makeCountry(name: "France")]
+        let countries = [TestFixtures.makeCountry(name: "Argentina"), TestFixtures.makeCountry(name: "France"), TestFixtures.makeCountry(name: "Netherlands")]
         await cache.save(key: "test.countries", value: countries)
 
         let loaded: [Country]? = await cache.load(key: "test.countries")
         XCTAssertNotNil(loaded)
-        XCTAssertEqual(loaded?.count, 2)
-        XCTAssertEqual(loaded?[0].name, "Germany")
+        XCTAssertEqual(loaded?.count, 3)
+        XCTAssertEqual(loaded?[0].name, "Argentina")
     }
 
     func testSaveAndLoadLanguages() async {

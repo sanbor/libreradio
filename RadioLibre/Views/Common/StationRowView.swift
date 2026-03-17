@@ -13,7 +13,7 @@ struct StationRowView: View {
         var parts = [station.name]
         if let codec = station.codec, !codec.isEmpty { parts.append(codec) }
         if let bitrate = station.bitrate, bitrate > 0 { parts.append("\(bitrate) kbps") }
-        if let country = station.country, !country.isEmpty { parts.append(country) }
+        if let country = station.countryDisplayName, !country.isEmpty { parts.append(country) }
         if isConnecting { parts.append("Connecting") }
         return parts.joined(separator: ", ")
     }
@@ -72,7 +72,7 @@ struct StationRowView: View {
                             .clipShape(Capsule())
                     }
 
-                    if let country = station.country, !country.isEmpty {
+                    if let country = station.countryDisplayName, !country.isEmpty {
                         HStack(spacing: 2) {
                             if let flag = station.flagEmoji {
                                 Text(flag).font(.caption2)

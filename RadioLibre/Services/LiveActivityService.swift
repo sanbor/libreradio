@@ -17,7 +17,7 @@ final class LiveActivityService {
             codec: station.codec,
             bitrateLabel: station.bitrateLabel,
             flagEmoji: station.flagEmoji,
-            countryName: station.country,
+            countryName: station.countryDisplayName,
             isPlaying: isPlaying,
             isLoading: isLoading,
             isBuffering: isBuffering
@@ -53,10 +53,17 @@ final class LiveActivityService {
 
     func end() {
         guard #available(iOS 16.2, *) else { return }
-        guard let activity = currentActivity as? Activity<RadioActivityAttributes> else { return }
 
-        Task {
-            await activity.end(nil, dismissalPolicy: .immediate)
+        if let activity = currentActivity as? Activity<RadioActivityAttributes> {
+            Task {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        } else {
+            for activity in Activity<RadioActivityAttributes>.activities {
+                Task {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                }
+            }
         }
         currentActivity = nil
     }

@@ -22,19 +22,19 @@ final class StationListViewModelTests: XCTestCase {
     // MARK: - Initial State
 
     func testInitialState() {
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
 
         XCTAssertTrue(vm.stations.isEmpty)
         XCTAssertFalse(vm.isLoading)
         XCTAssertFalse(vm.isLoadingMore)
         XCTAssertNil(vm.error)
         XCTAssertTrue(vm.hasMore)
-        XCTAssertEqual(vm.title, "DE")
+        XCTAssertEqual(vm.title, "AR")
     }
 
     func testExplicitTitleOverridesDefault() {
-        let vm = StationListViewModel(filter: .country("DE"), title: "Germany", service: service)
-        XCTAssertEqual(vm.title, "Germany")
+        let vm = StationListViewModel(filter: .country("AR"), title: "Argentina", service: service)
+        XCTAssertEqual(vm.title, "Argentina")
     }
 
     func testTitleForLanguage() {
@@ -52,7 +52,7 @@ final class StationListViewModelTests: XCTestCase {
     func testLoadByCountry() async {
         setMockResponse(json: TestFixtures.stationArrayJSON(count: 5))
 
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
         await vm.load()
 
         XCTAssertEqual(vm.stations.count, 5)
@@ -95,7 +95,7 @@ final class StationListViewModelTests: XCTestCase {
             throw URLError(.notConnectedToInternet)
         }
 
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
         await vm.load()
 
         XCTAssertNotNil(vm.error)
@@ -106,7 +106,7 @@ final class StationListViewModelTests: XCTestCase {
     func testLoadGuardsConcurrency() async {
         setMockResponse(json: TestFixtures.stationArrayJSON(count: 1))
 
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
         vm.isLoading = true
 
         await vm.load()
@@ -146,7 +146,7 @@ final class StationListViewModelTests: XCTestCase {
     func testLoadMoreGuardsWhenNoMore() async {
         setMockResponse(json: TestFixtures.stationArrayJSON(count: 10))
 
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
         await vm.load()
         XCTAssertFalse(vm.hasMore)
 
@@ -158,7 +158,7 @@ final class StationListViewModelTests: XCTestCase {
     func testLoadMoreGuardsWhenAlreadyLoading() async {
         setMockResponse(json: TestFixtures.stationArrayJSON(count: 100))
 
-        let vm = StationListViewModel(filter: .country("DE"), service: service)
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
         await vm.load()
         vm.isLoadingMore = true
 

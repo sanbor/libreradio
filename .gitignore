@@ -24,3 +24,6 @@ Package.resolved
 # Claude Code
 .claude/settings.local.json
 .claude/projects/
+
+# Personal
+NOTES.md

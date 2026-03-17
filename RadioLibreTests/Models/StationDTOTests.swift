@@ -15,11 +15,11 @@ final class StationDTOTests: XCTestCase {
             "homepage": "https://example.com",
             "favicon": "https://example.com/icon.png",
             "tags": "rock,jazz, blues",
-            "country": "Germany",
-            "countrycode": "DE",
-            "state": "Berlin",
-            "language": "german",
-            "languagecodes": "deu",
+            "country": "Argentina",
+            "countrycode": "AR",
+            "state": "Buenos Aires",
+            "language": "spanish",
+            "languagecodes": "spa",
             "codec": "MP3",
             "bitrate": 128,
             "hls": 0,
@@ -29,8 +29,8 @@ final class StationDTOTests: XCTestCase {
             "lastcheckok": 1,
             "lastcheckoktime": "2024-01-01 00:00:00",
             "lastcheckoktime_iso8601": "2024-01-01T00:00:00Z",
-            "geo_lat": 52.52,
-            "geo_long": 13.405,
+            "geo_lat": -34.60,
+            "geo_long": -58.38,
             "has_extended_info": true
         }
         """.data(using: .utf8)!
@@ -44,11 +44,11 @@ final class StationDTOTests: XCTestCase {
         XCTAssertEqual(station.homepage, "https://example.com")
         XCTAssertEqual(station.favicon, "https://example.com/icon.png")
         XCTAssertEqual(station.tags, "rock,jazz, blues")
-        XCTAssertEqual(station.country, "Germany")
-        XCTAssertEqual(station.countrycode, "DE")
-        XCTAssertEqual(station.state, "Berlin")
-        XCTAssertEqual(station.language, "german")
-        XCTAssertEqual(station.languagecodes, "deu")
+        XCTAssertEqual(station.country, "Argentina")
+        XCTAssertEqual(station.countrycode, "AR")
+        XCTAssertEqual(station.state, "Buenos Aires")
+        XCTAssertEqual(station.language, "spanish")
+        XCTAssertEqual(station.languagecodes, "spa")
         XCTAssertEqual(station.codec, "MP3")
         XCTAssertEqual(station.bitrate, 128)
         XCTAssertEqual(station.hls, 0)
@@ -56,8 +56,8 @@ final class StationDTOTests: XCTestCase {
         XCTAssertEqual(station.clickcount, 100)
         XCTAssertEqual(station.clicktrend, 5)
         XCTAssertEqual(station.lastcheckok, 1)
-        XCTAssertEqual(station.geoLat, 52.52)
-        XCTAssertEqual(station.geoLong, 13.405)
+        XCTAssertEqual(station.geoLat, -34.60)
+        XCTAssertEqual(station.geoLong, -58.38)
         XCTAssertEqual(station.hasExtendedInfo, true)
     }
 
@@ -177,7 +177,7 @@ final class StationDTOTests: XCTestCase {
     func testGetFlagNormalizesCase() {
         XCTAssertEqual(getFlag(from: "FR"), "🇫🇷")
         XCTAssertEqual(getFlag(from: "us"), "🇺🇸")
-        XCTAssertEqual(getFlag(from: "de"), "🇩🇪")
+        XCTAssertEqual(getFlag(from: "ar"), "🇦🇷")
     }
 
     func testFlagEmojiValidCode() {
@@ -198,8 +198,8 @@ final class StationDTOTests: XCTestCase {
     // MARK: - Location Label
 
     func testLocationLabelCountry() {
-        let station = StationDTOTests.makeStation(countrycode: "DE")
-        XCTAssertEqual(station.locationLabel, "DE")
+        let station = StationDTOTests.makeStation(countrycode: "AR")
+        XCTAssertEqual(station.locationLabel, "AR")
     }
 
     func testLocationLabelNilWhenNil() {
@@ -210,6 +210,28 @@ final class StationDTOTests: XCTestCase {
     func testLocationLabelNilWhenEmpty() {
         let station = StationDTOTests.makeStation(countrycode: "")
         XCTAssertNil(station.locationLabel)
+    }
+
+    // MARK: - Country Display Name
+
+    func testCountryDisplayNameFromCountryCode() {
+        let station = StationDTOTests.makeStation(country: "Netherlands", countrycode: "NL")
+        XCTAssertEqual(station.countryDisplayName, "Netherlands")
+    }
+
+    func testCountryDisplayNameFrance() {
+        let station = StationDTOTests.makeStation(country: "France", countrycode: "FR")
+        XCTAssertEqual(station.countryDisplayName, "France")
+    }
+
+    func testCountryDisplayNameFallsBackToCountryWhenNoCode() {
+        let station = StationDTOTests.makeStation(country: "Netherlands", countrycode: nil)
+        XCTAssertEqual(station.countryDisplayName, "Netherlands")
+    }
+
+    func testCountryDisplayNameNilWhenBothNil() {
+        let station = StationDTOTests.makeStation(country: nil, countrycode: nil)
+        XCTAssertNil(station.countryDisplayName)
     }
 
     // MARK: - Hashable

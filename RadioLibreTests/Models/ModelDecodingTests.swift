@@ -7,34 +7,39 @@ final class ModelDecodingTests: XCTestCase {
 
     func testDecodeCountry() throws {
         let json = """
-        {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500}
+        {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500}
         """.data(using: .utf8)!
 
         let country = try JSONDecoder().decode(Country.self, from: json)
-        XCTAssertEqual(country.name, "Germany")
-        XCTAssertEqual(country.iso_3166_1, "DE")
+        XCTAssertEqual(country.name, "Argentina")
+        XCTAssertEqual(country.iso_3166_1, "AR")
         XCTAssertEqual(country.stationcount, 500)
-        XCTAssertEqual(country.id, "DE")
-        XCTAssertEqual(country.displayName, "Germany")
+        XCTAssertEqual(country.id, "AR")
+        XCTAssertEqual(country.displayName, "Argentina")
     }
 
     func testDecodeCountryArray() throws {
         let json = """
         [
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
             {"name": "United States", "iso_3166_1": "US", "stationcount": 3000}
         ]
         """.data(using: .utf8)!
 
         let countries = try JSONDecoder().decode([Country].self, from: json)
         XCTAssertEqual(countries.count, 2)
-        XCTAssertEqual(countries[0].iso_3166_1, "DE")
+        XCTAssertEqual(countries[0].iso_3166_1, "AR")
         XCTAssertEqual(countries[1].iso_3166_1, "US")
     }
 
     func testDisplayNameFromISOCode() {
         let country = Country(name: "The United States Of America", iso_3166_1: "US", stationcount: 1000)
         XCTAssertEqual(country.displayName, "United States")
+    }
+
+    func testDisplayNameNetherlandsFromISOCode() {
+        let country = Country(name: "Netherlands", iso_3166_1: "NL", stationcount: 800)
+        XCTAssertEqual(country.displayName, "Netherlands")
     }
 
     func testDisplayNameFallbackWhenISOEmpty() {

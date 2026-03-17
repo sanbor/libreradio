@@ -119,15 +119,15 @@ final class SearchViewModelTests: XCTestCase {
 
         let vm = SearchViewModel(service: service)
         vm.query = "test"
-        vm.filterCountrycode = "DE"
-        vm.filterLanguage = "german"
+        vm.filterCountrycode = "AR"
+        vm.filterLanguage = "spanish"
         vm.filterCodec = "MP3"
         vm.filterBitrateMin = 128
         await vm.performSearch()
 
         let query = capturedURL?.query ?? ""
-        XCTAssertTrue(query.contains("countrycode=DE"))
-        XCTAssertTrue(query.contains("language=german"))
+        XCTAssertTrue(query.contains("countrycode=AR"))
+        XCTAssertTrue(query.contains("language=spanish"))
         XCTAssertTrue(query.contains("codec=MP3"))
         XCTAssertTrue(query.contains("bitrateMin=128"))
     }

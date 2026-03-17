@@ -45,6 +45,31 @@ final class LiveActivityServiceTests: XCTestCase {
         XCTAssertFalse(state.isBuffering)
     }
 
+    func testContentStateFromNetherlandsStation() {
+        let station = StationDTOTests.makeStation(
+            name: "Radio NL",
+            country: "Netherlands",
+            countrycode: "NL",
+            codec: "AAC",
+            bitrate: 192
+        )
+
+        let state = RadioActivityAttributes.ContentState(
+            stationName: station.name,
+            codec: station.codec,
+            bitrateLabel: station.bitrateLabel,
+            flagEmoji: station.flagEmoji,
+            countryName: station.countryDisplayName,
+            isPlaying: true,
+            isLoading: false,
+            isBuffering: false
+        )
+
+        XCTAssertEqual(state.stationName, "Radio NL")
+        XCTAssertEqual(state.flagEmoji, "🇳🇱")
+        XCTAssertEqual(state.countryName, "Netherlands")
+    }
+
     func testContentStateFromStationWithNilFields() {
         let station = StationDTOTests.makeStation(name: "Minimal")
 
@@ -75,8 +100,8 @@ final class LiveActivityServiceTests: XCTestCase {
             stationName: "Rock FM",
             codec: "AAC",
             bitrateLabel: "256k",
-            flagEmoji: "🇩🇪",
-            countryName: "Germany",
+            flagEmoji: "🇦🇷",
+            countryName: "Argentina",
             isPlaying: true,
             isLoading: false,
             isBuffering: true
@@ -109,7 +134,7 @@ final class LiveActivityServiceTests: XCTestCase {
         )
         let b = RadioActivityAttributes.ContentState(
             stationName: "Rock FM", codec: "AAC", bitrateLabel: "256k",
-            flagEmoji: "🇩🇪", countryName: "Germany", isPlaying: false, isLoading: true, isBuffering: false
+            flagEmoji: "🇦🇷", countryName: "Argentina", isPlaying: false, isLoading: true, isBuffering: false
         )
         XCTAssertNotEqual(a, b)
     }

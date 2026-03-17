@@ -51,17 +51,17 @@ struct FullPlayerView: View {
                 .lineLimit(2)
 
             // Country / Language
-            if station.country != nil || station.language != nil {
+            if station.countryDisplayName != nil || station.language != nil {
                 HStack(spacing: 8) {
                     if let flag = station.flagEmoji {
                         Text(flag)
                     }
-                    if let country = station.country, !country.isEmpty {
+                    if let country = station.countryDisplayName, !country.isEmpty {
                         Text(country)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                    if station.country != nil && station.language != nil {
+                    if station.countryDisplayName != nil && station.language != nil {
                         Text("·")
                             .foregroundStyle(.secondary)
                     }

@@ -34,8 +34,9 @@ final class BrowseViewModelTests: XCTestCase {
         let json = """
         [
             {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000},
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
-            {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300},
+            {"name": "Netherlands", "iso_3166_1": "NL", "stationcount": 400}
         ]
         """
         setMockResponse(json: json)
@@ -43,12 +44,13 @@ final class BrowseViewModelTests: XCTestCase {
         let vm = BrowseViewModel(service: service, cache: cache)
         await vm.loadCountries()
 
-        XCTAssertEqual(vm.countries.count, 3)
+        XCTAssertEqual(vm.countries.count, 4)
         // Raw data is stored in API order (unsorted)
         let names = Set(vm.countries.map(\.displayName))
         XCTAssertTrue(names.contains("France"))
-        XCTAssertTrue(names.contains("Germany"))
+        XCTAssertTrue(names.contains("Argentina"))
         XCTAssertTrue(names.contains("United States"))
+        XCTAssertTrue(names.contains("Netherlands"))
         XCTAssertFalse(vm.isLoadingCountries)
         XCTAssertNil(vm.countriesError)
     }
@@ -83,7 +85,7 @@ final class BrowseViewModelTests: XCTestCase {
         let json = """
         [
             {"name": "english", "iso_639": "eng", "stationcount": 10000},
-            {"name": "german", "iso_639": "deu", "stationcount": 5000}
+            {"name": "spanish", "iso_639": "spa", "stationcount": 5000}
         ]
         """
         setMockResponse(json: json)
@@ -93,7 +95,7 @@ final class BrowseViewModelTests: XCTestCase {
 
         XCTAssertEqual(vm.languages.count, 2)
         XCTAssertEqual(vm.languages[0].name, "english")
-        XCTAssertEqual(vm.languages[1].name, "german")
+        XCTAssertEqual(vm.languages[1].name, "spanish")
         XCTAssertFalse(vm.isLoadingLanguages)
         XCTAssertNil(vm.languagesError)
     }
@@ -197,8 +199,9 @@ final class BrowseViewModelTests: XCTestCase {
         let json = """
         [
             {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000},
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
-            {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
+            {"name": "France", "iso_3166_1": "FR", "stationcount": 300},
+            {"name": "Netherlands", "iso_3166_1": "NL", "stationcount": 400}
         ]
         """
         setMockResponse(json: json)
@@ -207,17 +210,19 @@ final class BrowseViewModelTests: XCTestCase {
         await vm.loadCountries()
         vm.countrySortOrder = .alphabetical
 
-        XCTAssertEqual(vm.sortedCountries[0].displayName, "France")
-        XCTAssertEqual(vm.sortedCountries[1].displayName, "Germany")
-        XCTAssertEqual(vm.sortedCountries[2].displayName, "United States")
+        XCTAssertEqual(vm.sortedCountries[0].displayName, "Argentina")
+        XCTAssertEqual(vm.sortedCountries[1].displayName, "France")
+        XCTAssertEqual(vm.sortedCountries[2].displayName, "Netherlands")
+        XCTAssertEqual(vm.sortedCountries[3].displayName, "United States")
     }
 
     func testSortedCountriesByStationCount() async {
         let json = """
         [
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
             {"name": "France", "iso_3166_1": "FR", "stationcount": 300},
-            {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000}
+            {"name": "The United States Of America", "iso_3166_1": "US", "stationcount": 1000},
+            {"name": "Netherlands", "iso_3166_1": "NL", "stationcount": 400}
         ]
         """
         setMockResponse(json: json)
@@ -228,13 +233,14 @@ final class BrowseViewModelTests: XCTestCase {
 
         XCTAssertEqual(vm.sortedCountries[0].stationcount, 1000)
         XCTAssertEqual(vm.sortedCountries[1].stationcount, 500)
-        XCTAssertEqual(vm.sortedCountries[2].stationcount, 300)
+        XCTAssertEqual(vm.sortedCountries[2].stationcount, 400)
+        XCTAssertEqual(vm.sortedCountries[3].stationcount, 300)
     }
 
     func testSortedLanguagesAlphabetical() async {
         let json = """
         [
-            {"name": "german", "iso_639": "deu", "stationcount": 5000},
+            {"name": "spanish", "iso_639": "spa", "stationcount": 5000},
             {"name": "english", "iso_639": "eng", "stationcount": 10000}
         ]
         """
@@ -245,14 +251,14 @@ final class BrowseViewModelTests: XCTestCase {
         vm.languagesSortOrder = .alphabetical
 
         XCTAssertEqual(vm.sortedLanguages[0].name, "english")
-        XCTAssertEqual(vm.sortedLanguages[1].name, "german")
+        XCTAssertEqual(vm.sortedLanguages[1].name, "spanish")
     }
 
     func testSortedLanguagesByStationCount() async {
         let json = """
         [
             {"name": "english", "iso_639": "eng", "stationcount": 10000},
-            {"name": "german", "iso_639": "deu", "stationcount": 5000}
+            {"name": "spanish", "iso_639": "spa", "stationcount": 5000}
         ]
         """
         setMockResponse(json: json)
@@ -262,7 +268,7 @@ final class BrowseViewModelTests: XCTestCase {
         vm.languagesSortOrder = .byStationCount
 
         XCTAssertEqual(vm.sortedLanguages[0].name, "english")
-        XCTAssertEqual(vm.sortedLanguages[1].name, "german")
+        XCTAssertEqual(vm.sortedLanguages[1].name, "spanish")
     }
 
     func testSortedTagsAlphabetical() async {
@@ -307,7 +313,7 @@ final class BrowseViewModelTests: XCTestCase {
 
     func testCachedCountriesShownOnNetworkFailure() async {
         let countries = [
-            TestFixtures.makeCountry(name: "Germany", stationcount: 500),
+            TestFixtures.makeCountry(name: "Argentina", stationcount: 500),
             TestFixtures.makeCountry(name: "France", stationcount: 300),
         ]
         await cache.save(key: StationCacheService.browseCountries, value: countries)
@@ -320,7 +326,7 @@ final class BrowseViewModelTests: XCTestCase {
         await vm.loadCountries()
 
         XCTAssertEqual(vm.countries.count, 2)
-        XCTAssertEqual(vm.countries[0].name, "Germany")
+        XCTAssertEqual(vm.countries[0].name, "Argentina")
         XCTAssertNil(vm.countriesError)
         XCTAssertFalse(vm.isLoadingCountries)
     }
@@ -331,7 +337,7 @@ final class BrowseViewModelTests: XCTestCase {
 
         let json = """
         [
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500},
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
             {"name": "France", "iso_3166_1": "FR", "stationcount": 300}
         ]
         """
@@ -343,13 +349,13 @@ final class BrowseViewModelTests: XCTestCase {
         XCTAssertEqual(vm.countries.count, 2)
         let names = Set(vm.countries.map(\.displayName))
         XCTAssertTrue(names.contains("France"))
-        XCTAssertTrue(names.contains("Germany"))
+        XCTAssertTrue(names.contains("Argentina"))
     }
 
     func testCountriesCacheUpdatedAfterFetch() async {
         let json = """
         [
-            {"name": "Germany", "iso_3166_1": "DE", "stationcount": 500}
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500}
         ]
         """
         setMockResponse(json: json)
@@ -360,7 +366,7 @@ final class BrowseViewModelTests: XCTestCase {
         let cached: [Country]? = await cache.load(key: StationCacheService.browseCountries)
         XCTAssertNotNil(cached)
         XCTAssertEqual(cached?.count, 1)
-        XCTAssertEqual(cached?[0].name, "Germany")
+        XCTAssertEqual(cached?[0].name, "Argentina")
     }
 
     func testCachedLanguagesShownOnNetworkFailure() async {

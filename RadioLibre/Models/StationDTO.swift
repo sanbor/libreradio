@@ -56,6 +56,13 @@ struct StationDTO: Codable, Identifiable, Hashable, Sendable {
         return "\(bitrate)k"
     }
 
+    var countryDisplayName: String? {
+        guard let countrycode, countrycode.count == 2,
+              let localized = Locale(identifier: "en").localizedString(forRegionCode: countrycode)
+        else { return country }
+        return localized
+    }
+
     var flagEmoji: String? {
         guard let countrycode, countrycode.count == 2 else { return nil }
         return getFlag(from: countrycode)

@@ -31,6 +31,26 @@ final class RadioActivityAttributesTests: XCTestCase {
         XCTAssertEqual(decoded.isBuffering, false)
     }
 
+    func testContentStateEncodesAndDecodesNetherlandsFields() throws {
+        let state = RadioActivityAttributes.ContentState(
+            stationName: "Radio NL",
+            codec: "AAC",
+            bitrateLabel: "192k",
+            flagEmoji: "🇳🇱",
+            countryName: "Netherlands",
+            isPlaying: true,
+            isLoading: false,
+            isBuffering: false
+        )
+
+        let data = try JSONEncoder().encode(state)
+        let decoded = try JSONDecoder().decode(RadioActivityAttributes.ContentState.self, from: data)
+
+        XCTAssertEqual(decoded.stationName, "Radio NL")
+        XCTAssertEqual(decoded.flagEmoji, "🇳🇱")
+        XCTAssertEqual(decoded.countryName, "Netherlands")
+    }
+
     func testContentStateEncodesAndDecodesNilOptionals() throws {
         let state = RadioActivityAttributes.ContentState(
             stationName: "Minimal",
@@ -76,7 +96,7 @@ final class RadioActivityAttributesTests: XCTestCase {
         )
         let b = RadioActivityAttributes.ContentState(
             stationName: "Rock FM", codec: "AAC", bitrateLabel: "256k",
-            flagEmoji: "🇩🇪", countryName: "Germany", isPlaying: false, isLoading: true, isBuffering: false
+            flagEmoji: "🇦🇷", countryName: "Argentina", isPlaying: false, isLoading: true, isBuffering: false
         )
         XCTAssertNotEqual(a, b)
     }

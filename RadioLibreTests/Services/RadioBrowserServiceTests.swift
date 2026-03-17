@@ -85,8 +85,8 @@ final class RadioBrowserServiceTests: XCTestCase {
 
         _ = try await service.searchStations(
             name: "test",
-            countrycode: "DE",
-            language: "german",
+            countrycode: "AR",
+            language: "spanish",
             tag: "rock",
             codec: "MP3",
             bitrateMin: 128,
@@ -99,8 +99,8 @@ final class RadioBrowserServiceTests: XCTestCase {
 
         let query = capturedURL?.query ?? ""
         XCTAssertTrue(query.contains("name=test"))
-        XCTAssertTrue(query.contains("countrycode=DE"))
-        XCTAssertTrue(query.contains("language=german"))
+        XCTAssertTrue(query.contains("countrycode=AR"))
+        XCTAssertTrue(query.contains("language=spanish"))
         XCTAssertTrue(query.contains("tag=rock"))
         XCTAssertTrue(query.contains("codec=MP3"))
         XCTAssertTrue(query.contains("bitrateMin=128"))
@@ -111,13 +111,17 @@ final class RadioBrowserServiceTests: XCTestCase {
 
     func testFetchCountries() async throws {
         let json = """
-        [{"name": "Germany", "iso_3166_1": "DE", "stationcount": 500}]
+        [
+            {"name": "Argentina", "iso_3166_1": "AR", "stationcount": 500},
+            {"name": "Netherlands", "iso_3166_1": "NL", "stationcount": 400}
+        ]
         """
         setMockResponse(path: "/json/countries", json: json)
 
         let countries = try await service.fetchCountries()
-        XCTAssertEqual(countries.count, 1)
-        XCTAssertEqual(countries[0].name, "Germany")
+        XCTAssertEqual(countries.count, 2)
+        XCTAssertEqual(countries[0].name, "Argentina")
+        XCTAssertEqual(countries[1].name, "Netherlands")
     }
 
     func testFetchLanguages() async throws {
@@ -145,9 +149,9 @@ final class RadioBrowserServiceTests: XCTestCase {
     // MARK: - Filtered Lists
 
     func testFetchStationsByCountry() async throws {
-        setMockResponse(path: "/json/stations/bycountrycodeexact/DE", json: TestFixtures.stationArrayJSON(count: 2))
+        setMockResponse(path: "/json/stations/bycountrycodeexact/AR", json: TestFixtures.stationArrayJSON(count: 2))
 
-        let stations = try await service.fetchStationsByCountry("DE")
+        let stations = try await service.fetchStationsByCountry("AR")
         XCTAssertEqual(stations.count, 2)
     }
 
