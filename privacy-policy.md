@@ -31,6 +31,8 @@ This data remains on your device and is not accessible to anyone else. If you de
 
 LibreRadio connects to the [Radio Browser](https://www.radio-browser.info/) community API to retrieve station listings, search results, and station metadata. These requests are made directly to the Radio Browser servers. Please refer to the [Radio Browser FAQ](https://www.radio-browser.info/faq) for information about their data handling practices.
 
+When you vote for a station, a vote is sent to the Radio Browser API. This is a standard feature of the Radio Browser community database and does not include any personal information.
+
 When you play a radio station, your device connects directly to that station's audio stream. LibreRadio has no control over the data practices of individual radio stations.
 
 ## Permissions
