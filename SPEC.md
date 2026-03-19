@@ -359,6 +359,7 @@ Shows:
 - Vote button
 - Tag chips
 - Station metadata: codec, bitrate, last check status + time
+- Radio Browser link (opens radio-browser.info)
 - Homepage link (opens in Safari)
 
 Previous/next cycle through favorites.

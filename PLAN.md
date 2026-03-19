@@ -1032,6 +1032,7 @@ Full-screen sheet:
 │                                                  │
 │         Codec: MP3  ·  Bitrate: 128 kbps         │
 │         Last checked: 2 hours ago ✅              │
+│         Radio Browser: radio-browser.info →      │
 │         Website: station.example.com →           │
 │                                                  │
 └──────────────────────────────────────────────────┘

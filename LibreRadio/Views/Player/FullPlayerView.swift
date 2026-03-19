@@ -165,6 +165,12 @@ struct FullPlayerView: View {
             .background(Color(.systemGray6))
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+            // Radio Browser link
+            Link(destination: URL(string: "https://www.radio-browser.info")!) {
+                Label("Radio Browser", systemImage: "radio")
+                    .font(.subheadline)
+            }
+
             // Homepage link
             if let homepageURL = station.homepageURL {
                 Link(destination: homepageURL) {
