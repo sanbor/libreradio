@@ -12,7 +12,7 @@ struct StationCardView: View {
                 Text(station.name)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .lineLimit(2)
+                    .lineLimit(2, reservesSpace: true)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
 
@@ -26,6 +26,10 @@ struct StationCardView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
+                } else {
+                    Text(" ")
+                        .font(.caption2)
+                        .hidden()
                 }
             }
             .frame(width: 130)
