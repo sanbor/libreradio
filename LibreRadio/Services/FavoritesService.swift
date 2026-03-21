@@ -89,6 +89,7 @@ actor FavoritesService {
                         faviconURL: serverStation.favicon,
                         tags: serverStation.tags,
                         countrycode: serverStation.countrycode,
+                        state: serverStation.state,
                         language: serverStation.language,
                         codec: serverStation.codec,
                         bitrate: serverStation.bitrate ?? 0,

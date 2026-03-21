@@ -22,17 +22,14 @@ actor HistoryService {
 
         let now = Date()
 
-        // Dedup: if same station played within 30 minutes, update timestamp
+        // Dedup: if same station played within 30 minutes, replace with fresh entry
         if let index = entries.firstIndex(where: { $0.stationuuid == station.stationuuid }),
            now.timeIntervalSince(entries[index].playedAt) < dedupWindowSeconds {
-            entries[index].playedAt = now
-            // Move to front
-            let entry = entries.remove(at: index)
-            entries.insert(entry, at: 0)
-        } else {
-            let entry = HistoryEntry(from: station)
-            entries.insert(entry, at: 0)
+            entries.remove(at: index)
         }
+
+        let entry = HistoryEntry(from: station)
+        entries.insert(entry, at: 0)
 
         // Enforce max entries
         if entries.count > maxEntries {
