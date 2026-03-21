@@ -74,7 +74,11 @@ struct StationDTO: Codable, Identifiable, Hashable, Sendable {
 
     var locationLabel: String? {
         guard let countrycode, countrycode.count == 2 else { return nil }
-        return countryDisplayName ?? countrycode.uppercased()
+        let code = countrycode.uppercased()
+        if let state, !state.isEmpty {
+            return "\(code) \(state)"
+        }
+        return code
     }
 
     enum CodingKeys: String, CodingKey {

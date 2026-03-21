@@ -93,7 +93,7 @@ final class LiveActivityService {
             codec: station.codec,
             bitrateLabel: station.bitrateLabel,
             flagEmoji: station.flagEmoji,
-            countryName: station.countryDisplayName,
+            countryLocation: station.locationLabel,
             isPlaying: lastIsPlaying,
             isLoading: lastIsLoading,
             isBuffering: lastIsBuffering,

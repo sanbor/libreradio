@@ -51,6 +51,9 @@ Derived behavior:
 - Tag list: split by comma, trim whitespace, drop empties
 - Prefer resolved stream URL; fall back to raw URL
 - Favicon/homepage: nil when empty string
+- Favicon URLs: upgraded from `http://` to `https://` (ATS requires HTTPS for in-app image downloads via URLSession)
+- Stream URLs: `http://` allowed as-is (`NSAllowsArbitraryLoadsForMedia`; many stations only support HTTP)
+- Homepage URLs: no conversion needed (opened externally in Safari, which handles `http://` natively)
 - Bitrate label: `"128k"` format, or `"—"` when zero/missing
 - Online: last check OK = 1
 
@@ -299,16 +302,16 @@ Allows HTTP (non-HTTPS) for media streams only via `NSAllowsArbitraryLoadsForMed
 
 ### Live Activity (iOS 16.2+)
 
-The Live Activity provides an enhanced lock screen experience. `MPNowPlayingInfoCenter.nowPlayingInfo` is also set by `updateNowPlaying()` with station name, artist metadata (country + codec + bitrate), live stream flag, playback rate, and favicon artwork. Live Activity takes visual priority on the lock screen; `nowPlayingInfo` provides CarPlay Now Playing tab metadata and the standard Control Center widget.
+The Live Activity provides an enhanced lock screen experience. `MPNowPlayingInfoCenter.nowPlayingInfo` is also set by `updateNowPlaying()` with station name, artist metadata (country code + subdivision + codec + bitrate), live stream flag, playback rate, and favicon artwork. Live Activity takes visual priority on the lock screen; `nowPlayingInfo` provides CarPlay Now Playing tab metadata and the standard Control Center widget.
 
 **Lock screen banner** shows:
 - Station favicon (40×40 rounded rect, placeholder radio icon if unavailable)
 - Flag emoji + station name (headline)
-- Country name, codec, bitrate (secondary metadata)
+- Country code + subdivision, codec, bitrate (secondary metadata, no flag emoji — emojis render as gray rectangles on the lock screen)
 - Play/pause and stop buttons (iOS 17+ via `LiveActivityIntent`; static state icon on iOS 16.2)
 
 **Dynamic Island** shows:
-- Expanded: station favicon + name (leading), playback controls (trailing), flag + country + codec + bitrate (bottom)
+- Expanded: station favicon + name (leading), playback controls (trailing), country code + subdivision + codec + bitrate (bottom, no flag emoji)
 - Compact: radio icon (leading), state icon (trailing)
 - Minimal: radio icon
 
@@ -318,7 +321,7 @@ The Live Activity provides an enhanced lock screen experience. `MPNowPlayingInfo
 - On app launch, orphaned activities from previous sessions are ended immediately
 - On app restart, existing activities are recovered from `Activity<RadioActivityAttributes>.activities` before creating new ones (prevents duplicates)
 
-**ContentState:** station name, codec, bitrate label, flag emoji, country name, isPlaying, isLoading, isBuffering, faviconData (optional thumbnail bytes).
+**ContentState:** station name, codec, bitrate label, flag emoji, country location label (country code + subdivision), isPlaying, isLoading, isBuffering, faviconData (optional thumbnail bytes).
 
 **Favicon in widget:** Widget extensions cannot make network requests. `LiveActivityService` fetches the favicon via `ImageCacheService` in the main app, resizes to 80×80 JPEG (~2-4KB), and passes the bytes through `ContentState.faviconData: Data?`. On station change, favicon is fetched asynchronously and the activity is re-updated when ready.
 
@@ -355,7 +358,7 @@ Sheet presented from the mini player.
 
 Shows:
 - Large favicon (120×120)
-- Station name, country, language
+- Station name, full country name, language
 - Previous / play-pause / next buttons
 - Volume slider
 - AirPlay button (system route picker)
@@ -376,7 +379,7 @@ Reusable list row used across all station lists.
 
 Layout: favicon (44×44) | name + subtitle + location | codec badge + bitrate label.
 
-Left side shows station name, subtitle line (tags by default, or custom text like relative timestamp), and location (flag + full country name). Right side shows codec badge and bitrate. An optional `subtitle` parameter overrides the default tags display (used by Recent tab for relative timestamps).
+Left side shows station name, subtitle line (tags by default, or custom text like relative timestamp), and location (flag emoji + country code + state/subdivision when available, e.g. "🇦🇷 AR Buenos Aires"). Right side shows codec badge and bitrate. An optional `subtitle` parameter overrides the default tags display (used by Recent tab for relative timestamps).
 
 Interactions:
 - Tap → play station

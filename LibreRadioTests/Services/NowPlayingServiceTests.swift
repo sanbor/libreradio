@@ -54,7 +54,7 @@ final class NowPlayingServiceTests: XCTestCase {
         XCTAssertNotNil(artist)
         // Should contain country, codec, and bitrate but no flag emoji
         // (flag emojis render as gray rectangles in MPNowPlayingInfoCenter)
-        XCTAssertEqual(artist, "Netherlands · AAC+ 95k")
+        XCTAssertEqual(artist, "NL · AAC+ 95k")
         XCTAssertFalse(artist?.contains("🇳🇱") == true)
     }
 

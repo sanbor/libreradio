@@ -12,7 +12,7 @@ final class RadioActivityAttributesTests: XCTestCase {
             codec: "MP3",
             bitrateLabel: "128k",
             flagEmoji: "🇫🇷",
-            countryName: "France",
+            countryLocation: "France",
             isPlaying: true,
             isLoading: false,
             isBuffering: false,
@@ -26,7 +26,7 @@ final class RadioActivityAttributesTests: XCTestCase {
         XCTAssertEqual(decoded.codec, "MP3")
         XCTAssertEqual(decoded.bitrateLabel, "128k")
         XCTAssertEqual(decoded.flagEmoji, "🇫🇷")
-        XCTAssertEqual(decoded.countryName, "France")
+        XCTAssertEqual(decoded.countryLocation, "France")
         XCTAssertEqual(decoded.isPlaying, true)
         XCTAssertEqual(decoded.isLoading, false)
         XCTAssertEqual(decoded.isBuffering, false)
@@ -38,7 +38,7 @@ final class RadioActivityAttributesTests: XCTestCase {
             codec: "AAC",
             bitrateLabel: "192k",
             flagEmoji: "🇳🇱",
-            countryName: "Netherlands",
+            countryLocation: "Netherlands",
             isPlaying: true,
             isLoading: false,
             isBuffering: false,
@@ -50,7 +50,7 @@ final class RadioActivityAttributesTests: XCTestCase {
 
         XCTAssertEqual(decoded.stationName, "Radio NL")
         XCTAssertEqual(decoded.flagEmoji, "🇳🇱")
-        XCTAssertEqual(decoded.countryName, "Netherlands")
+        XCTAssertEqual(decoded.countryLocation, "Netherlands")
     }
 
     func testContentStateEncodesAndDecodesNilOptionals() throws {
@@ -59,7 +59,7 @@ final class RadioActivityAttributesTests: XCTestCase {
             codec: nil,
             bitrateLabel: "—",
             flagEmoji: nil,
-            countryName: nil,
+            countryLocation: nil,
             isPlaying: false,
             isLoading: true,
             isBuffering: false,
@@ -73,7 +73,7 @@ final class RadioActivityAttributesTests: XCTestCase {
         XCTAssertNil(decoded.codec)
         XCTAssertEqual(decoded.bitrateLabel, "—")
         XCTAssertNil(decoded.flagEmoji)
-        XCTAssertNil(decoded.countryName)
+        XCTAssertNil(decoded.countryLocation)
         XCTAssertEqual(decoded.isPlaying, false)
         XCTAssertEqual(decoded.isLoading, true)
     }
@@ -83,11 +83,11 @@ final class RadioActivityAttributesTests: XCTestCase {
     func testContentStateEqualWhenAllFieldsMatch() {
         let a = RadioActivityAttributes.ContentState(
             stationName: "Jazz FM", codec: "MP3", bitrateLabel: "128k",
-            flagEmoji: "🇫🇷", countryName: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
+            flagEmoji: "🇫🇷", countryLocation: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
         )
         let b = RadioActivityAttributes.ContentState(
             stationName: "Jazz FM", codec: "MP3", bitrateLabel: "128k",
-            flagEmoji: "🇫🇷", countryName: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
+            flagEmoji: "🇫🇷", countryLocation: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
         )
         XCTAssertEqual(a, b)
     }
@@ -95,11 +95,11 @@ final class RadioActivityAttributesTests: XCTestCase {
     func testContentStateNotEqualWhenFieldsDiffer() {
         let a = RadioActivityAttributes.ContentState(
             stationName: "Jazz FM", codec: "MP3", bitrateLabel: "128k",
-            flagEmoji: "🇫🇷", countryName: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
+            flagEmoji: "🇫🇷", countryLocation: "France", isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
         )
         let b = RadioActivityAttributes.ContentState(
             stationName: "Rock FM", codec: "AAC", bitrateLabel: "256k",
-            flagEmoji: "🇦🇷", countryName: "Argentina", isPlaying: false, isLoading: true, isBuffering: false, faviconData: nil
+            flagEmoji: "🇦🇷", countryLocation: "Argentina", isPlaying: false, isLoading: true, isBuffering: false, faviconData: nil
         )
         XCTAssertNotEqual(a, b)
     }
@@ -111,7 +111,7 @@ final class RadioActivityAttributesTests: XCTestCase {
             codec: "MP3",
             bitrateLabel: "128k",
             flagEmoji: "🇫🇷",
-            countryName: "France",
+            countryLocation: "France",
             isPlaying: true,
             isLoading: false,
             isBuffering: false,
@@ -127,11 +127,11 @@ final class RadioActivityAttributesTests: XCTestCase {
     func testContentStateCanBeUsedInSet() {
         let a = RadioActivityAttributes.ContentState(
             stationName: "Jazz FM", codec: "MP3", bitrateLabel: "128k",
-            flagEmoji: nil, countryName: nil, isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
+            flagEmoji: nil, countryLocation: nil, isPlaying: true, isLoading: false, isBuffering: false, faviconData: nil
         )
         let b = RadioActivityAttributes.ContentState(
             stationName: "Rock FM", codec: "AAC", bitrateLabel: "256k",
-            flagEmoji: nil, countryName: nil, isPlaying: false, isLoading: false, isBuffering: false, faviconData: nil
+            flagEmoji: nil, countryLocation: nil, isPlaying: false, isLoading: false, isBuffering: false, faviconData: nil
         )
         let set: Set = [a, b, a]
         XCTAssertEqual(set.count, 2)

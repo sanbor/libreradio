@@ -9,7 +9,7 @@ struct RadioActivityAttributes: ActivityAttributes {
         let codec: String?
         let bitrateLabel: String
         let flagEmoji: String?
-        let countryName: String?
+        let countryLocation: String?
         let isPlaying: Bool
         let isLoading: Bool
         let isBuffering: Bool

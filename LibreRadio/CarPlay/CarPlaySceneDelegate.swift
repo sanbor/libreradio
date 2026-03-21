@@ -70,7 +70,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                     name: fav.name,
                     codec: fav.codec,
                     bitrate: fav.bitrate,
-                    faviconURLString: fav.faviconURL,
                     station: fav.toStationDTO(),
                     context: PlaybackContext(source: .favorites, stations: stationDTOs)
                 )
@@ -88,7 +87,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                     name: entry.name,
                     codec: entry.codec,
                     bitrate: entry.bitrate,
-                    faviconURLString: entry.faviconURL,
                     station: entry.toStationDTO(),
                     context: PlaybackContext(source: .recent, stations: stationDTOs)
                 )
@@ -105,7 +103,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                     name: dto.name,
                     codec: dto.codec,
                     bitrate: dto.bitrate.flatMap { $0 > 0 ? $0 : nil },
-                    faviconURLString: dto.favicon,
                     station: dto,
                     context: PlaybackContext(source: .homeTopClicks, stations: stations)
                 )
@@ -146,14 +143,13 @@ extension CarPlaySceneDelegate {
         name: String,
         codec: String?,
         bitrate: Int?,
-        faviconURLString: String?,
         station: StationDTO,
         context: PlaybackContext
     ) -> CPListItem {
         let placeholder = UIImage(systemName: "radio") ?? UIImage()
 
         var syncImage: UIImage?
-        if let urlString = faviconURLString, let url = URL(string: urlString) {
+        if let url = station.faviconURL {
             syncImage = ImageCacheService.shared.cachedImage(for: url)
         }
 
@@ -165,7 +161,7 @@ extension CarPlaySceneDelegate {
         )
 
         // Async-load image if not in memory cache
-        if syncImage == nil, let urlString = faviconURLString, let url = URL(string: urlString) {
+        if syncImage == nil, let url = station.faviconURL {
             Task {
                 if let image = await ImageCacheService.shared.image(for: url) {
                     item.setImage(image)

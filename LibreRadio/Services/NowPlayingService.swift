@@ -86,8 +86,8 @@ final class NowPlayingService {
     private func buildArtistString(for station: StationDTO) -> String {
         var parts: [String] = []
 
-        if let country = station.countryDisplayName {
-            parts.append(country)
+        if let locationLabel = station.locationLabel {
+            parts.append(locationLabel)
         }
 
         var codecBitrate: [String] = []

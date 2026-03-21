@@ -14,7 +14,7 @@ struct StationRowView: View {
         var parts = [station.name]
         if let codec = station.codec, !codec.isEmpty { parts.append(codec) }
         if let bitrate = station.bitrate, bitrate > 0 { parts.append("\(bitrate) kbps") }
-        if let country = station.countryDisplayName, !country.isEmpty { parts.append(country) }
+        if let location = station.locationLabel, !location.isEmpty { parts.append(location) }
         if isConnecting { parts.append("Connecting") }
         return parts.joined(separator: ", ")
     }

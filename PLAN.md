@@ -679,7 +679,7 @@ final class NowPlayingService {
     //   - previousTrackCommand → play previous favorite
 
     func updateNowPlaying(station: StationDTO, isPlaying: Bool)
-    // Sets nowPlayingInfo with station name, artist metadata (country + codec + bitrate),
+    // Sets nowPlayingInfo with station name, artist metadata (country code + subdivision + codec + bitrate, no flag emoji),
     // live stream flag, playback rate, and fetches favicon artwork asynchronously.
     // Rationale: keeping nowPlayingInfo populated ensures CarPlay Now Playing tab
     // and the standard Control Center widget work, while Live Activity provides
@@ -985,7 +985,7 @@ Search bar for filtering the country list locally.
 └──────────────────────────────────────────────────┘
 ```
 
-- Left side: name, subtitle (tags by default, or custom text via `subtitle` param), location (flag + full country name via `locationLabel`)
+- Left side: name, subtitle (tags by default, or custom text via `subtitle` param), location (flag emoji + country code + state/subdivision via `locationLabel`, e.g. "🇦🇷 AR Buenos Aires")
 - Right side: codec badge + bitrate label
 - Optional `subtitle: String?` parameter: when set, displays instead of tags (used by Recent tab for relative timestamps like "2 hr. ago")
 - Swipe actions: leading = toggle favorite (heart icon)
@@ -1130,6 +1130,11 @@ struct LibreRadioApp: App {
 
 `NSAllowsArbitraryLoadsForMedia` only relaxes ATS for media loaded by AVFoundation, not for all network traffic. This is more targeted than `NSAllowsArbitraryLoads`.
 
+**URL scheme handling by type:** The Radio Browser API returns URLs that may use `http://`. Each type is handled differently:
+- **Favicon URLs:** `StationDTO.faviconURL` upgrades `http://` → `https://` because image downloads via `URLSession`/`ImageCacheService` are subject to ATS. All code paths (views, CarPlay, Live Activities) must use this computed property, not the raw `favicon` string.
+- **Stream URLs:** Left as-is. `NSAllowsArbitraryLoadsForMedia` allows AVPlayer to stream over HTTP. Converting would break stations that don't support HTTPS.
+- **Homepage URLs:** Left as-is. Opened externally via Safari (`Link` / `openURL`), which handles HTTP natively outside ATS scope.
+
 ---
 
 ## iOS-Specific Technical Considerations
@@ -1145,7 +1150,7 @@ struct LibreRadioApp: App {
 - `MPRemoteCommandCenter` handlers registered once at app start
 - Commands: `playCommand`, `pauseCommand`, `stopCommand`, `togglePlayPauseCommand`, `nextTrackCommand`, `previousTrackCommand`
 - Live Activity playback controls (iOS 17+): `TogglePlaybackIntent` and `StopPlaybackIntent` (`LiveActivityIntent` conformers in `Shared/`) call `RadioPlaybackAction` closures wired at launch
-- `RadioActivityAttributes.ContentState` carries: station name, codec, bitrate, flag emoji, country name, playback state flags, favicon image data (optional, 80×80 JPEG thumbnail)
+- `RadioActivityAttributes.ContentState` carries: station name, codec, bitrate, flag emoji, country location label (country code + subdivision via `locationLabel`), playback state flags, favicon image data (optional, 80×80 JPEG thumbnail)
 - Activities ended with `.immediate` dismissal to prevent stale banners; orphaned activities cleaned up on launch
 
 ### AirPlay
@@ -1371,11 +1376,11 @@ struct LibreRadioApp: App {
 1. `NowPlayingService.updateNowPlaying()` sets `nowPlayingInfo` (station name, metadata, artwork) for CarPlay and Control Center alongside the Live Activity
 2. Fix duplicate Live Activities: `.immediate` dismissal policy, recover existing activities on app restart
 3. Fix play after stop: `lastPlayedStation` property in `AudioPlayerService`, `resume()` and `togglePlayPause()` fall back to it
-4. Add `countryName` to `RadioActivityAttributes.ContentState`, display in lock screen banner and Dynamic Island
+4. Add `countryLocation` to `RadioActivityAttributes.ContentState`, display in lock screen banner and Dynamic Island
 5. Add `LiveActivityIntent` playback controls (iOS 17+): `TogglePlaybackIntent`, `StopPlaybackIntent` in `Shared/` directory, `RadioPlaybackAction` closure-based dispatch, `Button(intent:)` in widget
 6. Update `project.yml` to include `Shared/` in both app and widget extension targets
 7. Wire `RadioPlaybackAction` closures in `LibreRadioApp.swift`
-8. Update all tests: `NowPlayingServiceTests` (verify `nowPlayingInfo` is set), `RadioActivityAttributesTests` + `LiveActivityServiceTests` (add `countryName`), `AudioPlayerServiceTests` (test `lastPlayedStation`, resume after stop, toggle from idle)
+8. Update all tests: `NowPlayingServiceTests` (verify `nowPlayingInfo` is set), `RadioActivityAttributesTests` + `LiveActivityServiceTests` (add `countryLocation`), `AudioPlayerServiceTests` (test `lastPlayedStation`, resume after stop, toggle from idle)
 9. Add `faviconData: Data?` to `ContentState` — favicon fetched/resized (80×80 JPEG) by `LiveActivityService` via `ImageCacheService`, passed as bytes through activity updates. Widget decodes `Data` → `UIImage` → `Image`. Lock screen shows 40×40 rounded-rect favicon; Dynamic Island expanded leading shows 24×24 favicon. Placeholder `radio` SF Symbol when nil. `TogglePlaybackIntent` carries forward `faviconData` in optimistic state.
 
 **Implementation notes (Phase 9):**
@@ -1384,7 +1389,7 @@ struct LibreRadioApp: App {
 - **CarPlay integration:** `CPNowPlayingTemplate` reads from `nowPlayingInfo`, which is populated by `NowPlayingService` — CarPlay Now Playing tab shows station metadata correctly.
 - **Favicon in widget:** Widget extensions cannot make network requests. `LiveActivityService` tracks `currentStationId` and `currentFaviconData` — on station change, clears cached data, fetches via `ImageCacheService`, resizes to 80×80 JPEG, stores result, and calls `performUpdate()` to re-update the activity. State tracking fields (`lastStation`, `lastIsPlaying`, etc.) enable the deferred re-update after async fetch completes.
 
-**Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 326 tests pass. Manual: only Live Activity on lock screen, no duplicates, play resumes after stop, country name displays correctly, buttons work on iOS 17+, favicon appears in lock screen and Dynamic Island.
+**Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 326 tests pass. Manual: only Live Activity on lock screen, no duplicates, play resumes after stop, country location displays correctly, buttons work on iOS 17+, favicon appears in lock screen and Dynamic Island.
 
 ---
 

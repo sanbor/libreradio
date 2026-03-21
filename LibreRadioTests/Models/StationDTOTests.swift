@@ -203,9 +203,19 @@ final class StationDTOTests: XCTestCase {
 
     // MARK: - Location Label
 
-    func testLocationLabelCountry() {
+    func testLocationLabelWithState() {
+        let station = StationDTOTests.makeStation(countrycode: "AR", state: "Buenos Aires")
+        XCTAssertEqual(station.locationLabel, "AR Buenos Aires")
+    }
+
+    func testLocationLabelCodeOnly() {
         let station = StationDTOTests.makeStation(countrycode: "AR")
-        XCTAssertEqual(station.locationLabel, "Argentina")
+        XCTAssertEqual(station.locationLabel, "AR")
+    }
+
+    func testLocationLabelCodeOnlyWhenEmptyState() {
+        let station = StationDTOTests.makeStation(countrycode: "AR", state: "")
+        XCTAssertEqual(station.locationLabel, "AR")
     }
 
     func testLocationLabelNilWhenNil() {

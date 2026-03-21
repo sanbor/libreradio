@@ -14,7 +14,7 @@ struct TogglePlaybackIntent: LiveActivityIntent {
                 codec: current.codec,
                 bitrateLabel: current.bitrateLabel,
                 flagEmoji: current.flagEmoji,
-                countryName: current.countryName,
+                countryLocation: current.countryLocation,
                 isPlaying: !current.isPlaying,
                 isLoading: false,
                 isBuffering: false,

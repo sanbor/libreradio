@@ -29,8 +29,8 @@ struct RadioLiveActivityWidget: Widget {
                         if let flag = context.state.flagEmoji {
                             Text(flag)
                         }
-                        if let countryName = context.state.countryName {
-                            Text(countryName)
+                        if let countryLocation = context.state.countryLocation {
+                            Text(countryLocation)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -75,8 +75,8 @@ struct RadioLiveActivityWidget: Widget {
                 }
 
                 HStack(spacing: 6) {
-                    if let countryName = context.state.countryName {
-                        Text(countryName)
+                    if let countryLocation = context.state.countryLocation {
+                        Text(countryLocation)
                     }
                     if let codec = context.state.codec {
                         Text(codec)

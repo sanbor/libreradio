@@ -60,8 +60,8 @@ struct StationDetailView: View {
 
     private var metadataGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            if let country = station.countryDisplayName, !country.isEmpty {
-                metadataItem(title: "Country", value: "\(station.flagEmoji ?? "") \(country)")
+            if let locationLabel = station.locationLabel {
+                metadataItem(title: "Country", value: "\(station.flagEmoji ?? "") \(locationLabel)")
             }
             if let language = station.language, !language.isEmpty {
                 metadataItem(title: "Language", value: language.capitalized)
