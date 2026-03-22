@@ -473,4 +473,82 @@ final class AudioPlayerServiceTests: XCTestCase {
         XCTAssertEqual(service.currentArtist, "Beatles")
         XCTAssertEqual(service.currentTrackTitle, "Yesterday")
     }
+
+    // MARK: - Track History
+
+    func testTrackHistoryStartsEmpty() {
+        XCTAssertTrue(service.trackHistory.isEmpty)
+    }
+
+    func testParseStreamTitleAppendsToHistory() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+        XCTAssertEqual(service.trackHistory.count, 1)
+        XCTAssertEqual(service.trackHistory[0].title, "Listen To Your Heart")
+        XCTAssertEqual(service.trackHistory[0].artist, "Roxette")
+    }
+
+    func testParseStreamTitleDeduplicatesSameTrack() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+        XCTAssertEqual(service.trackHistory.count, 1)
+    }
+
+    func testParseStreamTitleAppendsDifferentTracks() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+        service.parseStreamTitle("Beatles - Yesterday")
+        XCTAssertEqual(service.trackHistory.count, 2)
+    }
+
+    func testTrackHistoryNotClearedOnStop() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.parseStreamTitle("Roxette - Listen To Your Heart")
+
+        service.stop()
+        XCTAssertEqual(service.trackHistory.count, 1)
+    }
+
+    func testTrackHistoryNotClearedOnStationChange() {
+        let station1 = TestFixtures.makeStation(uuid: "s1", name: "Station 1")
+        let station2 = TestFixtures.makeStation(uuid: "s2", name: "Station 2")
+
+        service.play(station: station1)
+        service.parseStreamTitle("Artist1 - Song1")
+
+        service.play(station: station2)
+        service.parseStreamTitle("Artist2 - Song2")
+
+        XCTAssertEqual(service.trackHistory.count, 2)
+        XCTAssertEqual(service.trackHistory[0].stationName, "Station 1")
+        XCTAssertEqual(service.trackHistory[1].stationName, "Station 2")
+    }
+
+    func testTrackHistoryRecordsStationInfo() {
+        let station = TestFixtures.makeStation(uuid: "my-uuid", name: "My Radio")
+        service.play(station: station)
+        service.parseStreamTitle("Artist - Song")
+
+        XCTAssertEqual(service.trackHistory[0].stationName, "My Radio")
+        XCTAssertEqual(service.trackHistory[0].stationUUID, "my-uuid")
+    }
+
+    func testClearTrackHistory() {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+        service.parseStreamTitle("Artist - Song")
+        XCTAssertEqual(service.trackHistory.count, 1)
+
+        service.clearTrackHistory()
+        XCTAssertTrue(service.trackHistory.isEmpty)
+    }
 }

@@ -13,6 +13,7 @@ final class PlayerViewModel: ObservableObject {
     /// Exposed for testing – lets callers await the fire-and-forget history write.
     private(set) var historyTask: Task<Void, Never>?
     @Published private(set) var playbackContext: PlaybackContext?
+    @Published var trackBrowseIndex: Int?
 
     @MainActor
     init(
@@ -60,6 +61,40 @@ final class PlayerViewModel: ObservableObject {
         audioService.currentArtist
     }
 
+    var trackHistory: [TrackHistoryItem] {
+        audioService.trackHistory
+    }
+
+    var browsedTrackTitle: String? {
+        if let index = trackBrowseIndex, audioService.trackHistory.indices.contains(index) {
+            return audioService.trackHistory[index].title
+        }
+        return audioService.currentTrackTitle
+    }
+
+    var browsedArtist: String? {
+        if let index = trackBrowseIndex, audioService.trackHistory.indices.contains(index) {
+            return audioService.trackHistory[index].artist
+        }
+        return audioService.currentArtist
+    }
+
+    var isBrowsingHistory: Bool {
+        trackBrowseIndex != nil
+    }
+
+    var canBrowseBack: Bool {
+        guard !audioService.trackHistory.isEmpty else { return false }
+        if let index = trackBrowseIndex {
+            return index > 0
+        }
+        return true
+    }
+
+    var canBrowseForward: Bool {
+        trackBrowseIndex != nil
+    }
+
     var errorMessage: String? {
         if case .error(_, let message) = audioService.state {
             return message
@@ -83,7 +118,28 @@ final class PlayerViewModel: ObservableObject {
         return true
     }
 
+    func browseTrackBack() {
+        guard !audioService.trackHistory.isEmpty else { return }
+        if let currentIdx = trackBrowseIndex {
+            guard currentIdx > 0 else { return }
+            trackBrowseIndex = currentIdx - 1
+        } else {
+            trackBrowseIndex = audioService.trackHistory.count - 1
+        }
+    }
+
+    func browseTrackForward() {
+        guard let currentIdx = trackBrowseIndex else { return }
+        let nextIdx = currentIdx + 1
+        if nextIdx >= audioService.trackHistory.count - 1 {
+            trackBrowseIndex = nil
+        } else {
+            trackBrowseIndex = nextIdx
+        }
+    }
+
     func play(station: StationDTO, context: PlaybackContext? = nil) {
+        trackBrowseIndex = nil
         playbackContext = context ?? PlaybackContext(source: .standalone, stations: [station])
         audioService.play(station: station)
         historyTask = Task {

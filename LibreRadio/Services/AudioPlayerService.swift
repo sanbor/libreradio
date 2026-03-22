@@ -11,6 +11,7 @@ final class AudioPlayerService: ObservableObject {
     @Published private(set) var state: PlaybackState = .idle
     @Published private(set) var currentTrackTitle: String?
     @Published private(set) var currentArtist: String?
+    @Published private(set) var trackHistory: [TrackHistoryItem] = []
     @Published var volume: Float = 1.0 {
         didSet { player.volume = volume }
     }
@@ -364,7 +365,26 @@ final class AudioPlayerService: ObservableObject {
 
         if let station = currentStation {
             nowPlayingService.updateStreamMetadata(title: currentTrackTitle, artist: currentArtist, station: station)
+
+            if let trackTitle = currentTrackTitle {
+                let isDuplicate = trackHistory.last.map {
+                    $0.title == trackTitle && $0.artist == currentArtist && $0.stationUUID == station.stationuuid
+                } ?? false
+
+                if !isDuplicate {
+                    trackHistory.append(TrackHistoryItem(
+                        title: trackTitle,
+                        artist: currentArtist,
+                        stationName: station.name,
+                        stationUUID: station.stationuuid
+                    ))
+                }
+            }
         }
+    }
+
+    func clearTrackHistory() {
+        trackHistory = []
     }
 
     private func observePlayerItemStatus(item: AVPlayerItem, station: StationDTO) {

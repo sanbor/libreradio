@@ -377,6 +377,7 @@ Sheet presented from the mini player.
 Shows:
 - Large favicon (120×120)
 - Station name, flag emoji + full country name + subdivision (e.g. "🇳🇱 Netherlands, Amsterdam"; without subdivision: "🇳🇱 Netherlands")
+- Track info with browse controls (see below)
 - Previous / play-pause / next buttons
 - Volume slider
 - AirPlay button (system route picker)
@@ -388,6 +389,29 @@ Shows:
 - Homepage link (opens in Safari; percent-encodes URL for stations with special characters in their homepage)
 
 Previous/next cycle through favorites.
+
+### Track Info Browsing
+
+The track info area displays the current song title and artist from ICY stream metadata, or the station name as fallback when no metadata is available.
+
+**Browse controls:**
+- Left chevron button to browse previously played tracks; right chevron to go forward
+- Arrows only appear when track history exists (at least one ICY metadata update received)
+- Left arrow is dimmed (opacity 0.3) when at the oldest track
+- Right arrow is hidden (opacity 0) when viewing the live track; visible when browsing history
+- A "Browsing history" caption appears below the track info when not viewing the live track
+
+**History sheet:**
+- Tapping the track info area opens a sheet with the full track history
+- Shows all tracks from the current session in reverse chronological order (newest first)
+- Each row: title, artist (if available), station name, relative timestamp
+- Empty state: music note icon + "No tracks yet"
+
+**Track history rules:**
+- Session-scoped (in-memory) — not persisted across app restarts
+- Cross-station: tracks from all stations played during the session are included
+- Deduplicated: consecutive ICY metadata updates with the same title/artist/station are merged
+- Not cleared on stop or station change — only on app termination
 
 ---
 

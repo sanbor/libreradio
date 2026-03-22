@@ -295,4 +295,145 @@ final class PlayerViewModelTests: XCTestCase {
         XCTAssertEqual(vm.playbackContext?.source, .search)
         XCTAssertEqual(vm.playbackContext?.stations.count, 1)
     }
+
+    // MARK: - Track History Browsing
+
+    func testTrackHistoryForwardedFromAudioService() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song")
+
+        XCTAssertEqual(vm.trackHistory.count, 1)
+        XCTAssertEqual(vm.trackHistory[0].title, "Song")
+    }
+
+    func testBrowseBackAndForward() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song1")
+        audioService.parseStreamTitle("Artist - Song2")
+        audioService.parseStreamTitle("Artist - Song3")
+
+        // Initially viewing live (index nil)
+        XCTAssertNil(vm.trackBrowseIndex)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song3")
+
+        // Browse back once — goes to last history item
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 2)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song3")
+
+        // Browse back again
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 1)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song2")
+
+        // Browse back again
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 0)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song1")
+
+        // Can't go further back
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 0)
+
+        // Browse forward
+        vm.browseTrackForward()
+        XCTAssertEqual(vm.trackBrowseIndex, 1)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song2")
+    }
+
+    func testBrowseForwardToLiveResetsToNil() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song1")
+        audioService.parseStreamTitle("Artist - Song2")
+
+        // Browse back twice: live → index 1 → index 0
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 1)
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 0)
+
+        // Browse forward to last item, then to live
+        vm.browseTrackForward()
+        XCTAssertNil(vm.trackBrowseIndex)
+        XCTAssertEqual(vm.browsedTrackTitle, "Song2")
+    }
+
+    func testBrowsedTrackTitleReturnsLiveWhenNotBrowsing() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - LiveSong")
+
+        XCTAssertNil(vm.trackBrowseIndex)
+        XCTAssertEqual(vm.browsedTrackTitle, "LiveSong")
+        XCTAssertEqual(vm.browsedArtist, "Artist")
+    }
+
+    func testPlayResetsTrackBrowseIndex() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song1")
+        audioService.parseStreamTitle("Artist - Song2")
+        vm.browseTrackBack()
+        XCTAssertNotNil(vm.trackBrowseIndex)
+
+        let station2 = TestFixtures.makeStation(uuid: "s2", name: "Station 2")
+        vm.play(station: station2)
+        XCTAssertNil(vm.trackBrowseIndex)
+    }
+
+    func testCanBrowseBackFalseWhenEmpty() {
+        XCTAssertFalse(vm.canBrowseBack)
+    }
+
+    func testCanBrowseBackTrueWithSingleTrackAtLive() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song")
+
+        // At live, can browse back to see the track in history view
+        XCTAssertTrue(vm.canBrowseBack)
+    }
+
+    func testCanBrowseBackFalseAtFirstIndex() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song")
+
+        vm.browseTrackBack()
+        XCTAssertEqual(vm.trackBrowseIndex, 0)
+        XCTAssertFalse(vm.canBrowseBack)
+    }
+
+    func testCanBrowseForwardFalseWhenNotBrowsing() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song")
+
+        XCTAssertFalse(vm.canBrowseForward)
+    }
+
+    func testIsBrowsingHistory() {
+        let station = TestFixtures.makeStation()
+        vm.play(station: station)
+        audioService.parseStreamTitle("Artist - Song1")
+        audioService.parseStreamTitle("Artist - Song2")
+
+        XCTAssertFalse(vm.isBrowsingHistory)
+
+        vm.browseTrackBack()
+        XCTAssertTrue(vm.isBrowsingHistory)
+    }
+
+    func testBrowseBackOnEmptyDoesNothing() {
+        vm.browseTrackBack()
+        XCTAssertNil(vm.trackBrowseIndex)
+    }
+
+    func testBrowseForwardWhenNotBrowsingDoesNothing() {
+        vm.browseTrackForward()
+        XCTAssertNil(vm.trackBrowseIndex)
+    }
 }

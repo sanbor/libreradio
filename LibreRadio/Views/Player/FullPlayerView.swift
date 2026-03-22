@@ -5,6 +5,7 @@ struct FullPlayerView: View {
     @EnvironmentObject private var favoritesVM: FavoritesViewModel
 
     @State private var voteMessage: String?
+    @State private var showTrackHistory = false
 
     @Environment(\.dismiss) private var dismiss
 
@@ -67,24 +68,8 @@ struct FullPlayerView: View {
                 }
             }
 
-            // Now playing track info
-            if let title = playerVM.currentTrackTitle {
-                VStack(spacing: 4) {
-                    Text(title)
-                        .font(.headline)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                    if let artist = playerVM.currentArtist {
-                        Text(artist)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(1)
-                    }
-                }
-                .animation(.easeInOut, value: title)
-                .animation(.easeInOut, value: playerVM.currentArtist)
-            }
+            // Now playing track info with browse controls
+            trackInfoSection(station: station)
 
             // Player controls
             PlayerControlsView()
@@ -174,6 +159,74 @@ struct FullPlayerView: View {
             }
 
             Spacer(minLength: 20)
+        }
+        .sheet(isPresented: $showTrackHistory) {
+            TrackHistorySheet()
+                .environmentObject(playerVM)
+        }
+    }
+
+    @ViewBuilder
+    private func trackInfoSection(station: StationDTO) -> some View {
+        let hasHistory = !playerVM.trackHistory.isEmpty
+
+        HStack(spacing: 12) {
+            if hasHistory {
+                Button { playerVM.browseTrackBack() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .disabled(!playerVM.canBrowseBack)
+                .opacity(playerVM.canBrowseBack ? 1 : 0.3)
+                .accessibilityLabel("Previous Track")
+            }
+
+            VStack(spacing: 4) {
+                if let title = playerVM.browsedTrackTitle {
+                    Text(title)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    if let artist = playerVM.browsedArtist {
+                        Text(artist)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(1)
+                    }
+                } else {
+                    Text(station.name)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+
+                if playerVM.isBrowsingHistory {
+                    Text("Browsing history")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture { showTrackHistory = true }
+            .animation(.easeInOut, value: playerVM.browsedTrackTitle)
+            .animation(.easeInOut, value: playerVM.browsedArtist)
+
+            if hasHistory {
+                Button { playerVM.browseTrackForward() } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.title3)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .disabled(!playerVM.canBrowseForward)
+                .opacity(playerVM.canBrowseForward ? 1 : 0)
+                .accessibilityLabel("Next Track")
+            }
         }
     }
 

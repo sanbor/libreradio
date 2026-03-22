@@ -1424,7 +1424,7 @@ These features can be added after the core app is stable:
 
 1. **Sleep Timer** — countdown timer that stops playback
 2. **Stream Recording** — capture audio to file using `AVAssetWriter`
-3. **Track History** — display ICY metadata (artist/track) from stream
+3. ~~**Track History**~~ — **Done.** In-memory session-scoped track history with browse controls in full player. Stored on `AudioPlayerService.trackHistory` as `[TrackHistoryItem]` (not persisted). Full player shows left/right chevrons to browse and tap-to-open history sheet. Station name fallback when no ICY metadata.
 4. **Widgets** — WidgetKit for now-playing and favorite stations
 5. **Siri Shortcuts** — `AppIntent` for "Play [station name]"
 6. **Geo Search** — find stations near current location
