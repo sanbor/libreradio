@@ -32,10 +32,14 @@ struct LanguageListView: View {
 
     private var sectionedLanguages: [(letter: String, languages: [Language])] {
         let grouped = Dictionary(grouping: viewModel.sortedLanguages) { language in
-            String(language.name.capitalized.prefix(1)).uppercased()
+            languageSectionKey(for: language.name)
         }
-        return grouped.sorted { $0.key < $1.key }
-            .map { (letter: $0.key, languages: $0.value) }
+        return grouped.sorted { lhs, rhs in
+            if lhs.key == "#" { return false }
+            if rhs.key == "#" { return true }
+            return lhs.key < rhs.key
+        }
+        .map { (letter: $0.key, languages: $0.value) }
     }
 
     private var languageList: some View {
@@ -108,4 +112,10 @@ struct LanguageListView: View {
             }
         }
     }
+}
+
+func languageSectionKey(for name: String) -> String {
+    let folded = name.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+    guard let first = folded.first, first.isASCII && first.isLetter else { return "#" }
+    return String(first).uppercased()
 }

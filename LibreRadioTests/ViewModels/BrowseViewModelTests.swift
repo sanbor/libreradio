@@ -309,6 +309,111 @@ final class BrowseViewModelTests: XCTestCase {
         XCTAssertEqual(vm.sortedTags[2].name, "jazz")
     }
 
+    // MARK: - Language Filtering
+
+    func testSortedLanguagesFiltersJunkNames() async {
+        let json = """
+        [
+            {"name": "english", "iso_639": "eng", "stationcount": 10000},
+            {"name": "#english", "iso_639": null, "stationcount": 50},
+            {"name": "+7 languages", "iso_639": null, "stationcount": 2},
+            {"name": "123", "iso_639": null, "stationcount": 1},
+            {"name": "10 additional languages", "iso_639": null, "stationcount": 1},
+            {"name": "", "iso_639": null, "stationcount": 5},
+            {"name": "spanish", "iso_639": "spa", "stationcount": 5000}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+        vm.languagesSortOrder = .alphabetical
+
+        let names = vm.sortedLanguages.map(\.name)
+        XCTAssertEqual(names, ["english", "spanish"])
+    }
+
+    func testSortedLanguagesPreservesNonLatinScripts() async {
+        let json = """
+        [
+            {"name": "русский", "iso_639": "rus", "stationcount": 100},
+            {"name": "العربية", "iso_639": "ara", "stationcount": 80},
+            {"name": "日本語", "iso_639": "jpn", "stationcount": 50},
+            {"name": "हिन्दी", "iso_639": "hin", "stationcount": 30}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+        vm.languagesSortOrder = .byStationCount
+
+        XCTAssertEqual(vm.sortedLanguages.count, 4)
+    }
+
+    func testSortedLanguagesFiltersZeroStationCount() async {
+        let json = """
+        [
+            {"name": "english", "iso_639": "eng", "stationcount": 100},
+            {"name": "klingon", "iso_639": null, "stationcount": 0}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+
+        let names = vm.sortedLanguages.map(\.name)
+        XCTAssertEqual(names, ["english"])
+    }
+
+    func testSortedLanguagesTrimsWhitespaceBeforeCheck() async {
+        let json = """
+        [
+            {"name": " english", "iso_639": "eng", "stationcount": 100},
+            {"name": "  ", "iso_639": null, "stationcount": 5}
+        ]
+        """
+        setMockResponse(json: json)
+
+        let vm = BrowseViewModel(service: service, cache: cache)
+        await vm.loadLanguages()
+
+        XCTAssertEqual(vm.sortedLanguages.count, 1)
+        XCTAssertEqual(vm.sortedLanguages[0].name, " english")
+    }
+
+    // MARK: - Language Section Keys
+
+    func testLanguageSectionKeyForPlainLatin() {
+        XCTAssertEqual(languageSectionKey(for: "english"), "E")
+        XCTAssertEqual(languageSectionKey(for: "spanish"), "S")
+        XCTAssertEqual(languageSectionKey(for: "French"), "F")
+    }
+
+    func testLanguageSectionKeyFoldsDiacritics() {
+        XCTAssertEqual(languageSectionKey(for: "čeština"), "C")
+        XCTAssertEqual(languageSectionKey(for: "österreichisch"), "O")
+        XCTAssertEqual(languageSectionKey(for: "śląski"), "S")
+        XCTAssertEqual(languageSectionKey(for: "ülkücü"), "U")
+        XCTAssertEqual(languageSectionKey(for: "ñoño"), "N")
+    }
+
+    func testLanguageSectionKeyGroupsNonLatinUnderHash() {
+        XCTAssertEqual(languageSectionKey(for: "русский"), "#")
+        XCTAssertEqual(languageSectionKey(for: "العربية"), "#")
+        XCTAssertEqual(languageSectionKey(for: "日本語"), "#")
+        XCTAssertEqual(languageSectionKey(for: "हिन्दी"), "#")
+        XCTAssertEqual(languageSectionKey(for: "中文"), "#")
+        XCTAssertEqual(languageSectionKey(for: "한국어"), "#")
+    }
+
+    func testLanguageSectionKeyHandlesEdgeCases() {
+        XCTAssertEqual(languageSectionKey(for: "123"), "#")
+        XCTAssertEqual(languageSectionKey(for: "#test"), "#")
+        XCTAssertEqual(languageSectionKey(for: ""), "#")
+    }
+
     // MARK: - Cache Tests
 
     func testCachedCountriesShownOnNetworkFailure() async {

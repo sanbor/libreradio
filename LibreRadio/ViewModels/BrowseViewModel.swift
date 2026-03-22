@@ -105,11 +105,16 @@ final class BrowseViewModel: ObservableObject {
     }
 
     var sortedLanguages: [Language] {
+        let filtered = languages.filter { language in
+            let trimmed = language.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let first = trimmed.first, first.isLetter else { return false }
+            return language.stationcount >= 1
+        }
         switch languagesSortOrder {
         case .alphabetical:
-            languages.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            return filtered.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .byStationCount:
-            languages.sorted { $0.stationcount > $1.stationcount }
+            return filtered.sorted { $0.stationcount > $1.stationcount }
         }
     }
 

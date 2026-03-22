@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-22 — Fix language sorting by name with diacritics and overflow
+
+**Prompt:** `/implement fix sorting by name in the language section. there was a previous attempt to fix it already`
+
+**Changes:**
+- Fixed `LanguageListView.sectionedLanguages` to fold diacritics when computing section keys (č → C, ö → O, ś → S) using `String.folding(options:locale:)`, so accented Latin languages sort with their base letters instead of after Z
+- Non-Latin scripts (Cyrillic, CJK, Arabic) are grouped under a single trailing "#" section instead of creating dozens of individual sections
+- Updated `AlphabetIndexView` to handle overflow: uses `GeometryReader` to detect when letters exceed available height, clips the VStack, and scrolls the sidebar to keep the selected letter visible during drag
+- Added `languageSectionKey(for:)` helper function (internal, testable) extracted from the sectioning logic
+- Added 4 new tests for section key computation: plain Latin, diacritics folding, non-Latin grouping, edge cases
+
 ## 2026-03-22 — Persist lock screen info after stop
 
 **Prompt:** `/implement when the user press stop in the locked screen keep the star button, the station image, and the station name and current tune`

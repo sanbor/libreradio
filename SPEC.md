@@ -169,7 +169,7 @@ Three navigation links: Countries, Languages, Tags.
 
 **Countries:** sorted alphabetically ascending by display name (derived from ISO code via `Locale`). Each row shows flag emoji (derived from ISO code), country display name, station count. Locally searchable. Tapping → station list for that country. Note: flag emojis do not render properly in the iOS Simulator; test on a physical device to verify flag display.
 
-**Languages:** sorted by station count descending. Each row shows language name, station count. Tapping → station list for that language. Languages are filtered to exclude junk entries from the API: names must start with a Unicode letter (after trimming whitespace) and have at least 1 station. This removes entries starting with `#`, `+`, digits, or other symbols.
+**Languages:** sorted by station count descending. Each row shows language name, station count. Tapping → station list for that language. Languages are filtered to exclude junk entries from the API: names must start with a Unicode letter (after trimming whitespace) and have at least 1 station. This removes entries starting with `#`, `+`, digits, or other symbols. When sorted alphabetically, section keys fold diacritics to base Latin letters (e.g., č → C, ö → O) and group non-Latin scripts (Cyrillic, CJK, Arabic) under a trailing "#" section.
 
 **Tags:** sorted by station count descending. Each row shows tag name, station count. Tapping → station list for that tag.
 
