@@ -9,29 +9,28 @@ struct FullPlayerView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    Capsule()
-                        .fill(Color(.systemGray4))
-                        .frame(width: 36, height: 5)
-                        .padding(.top, 8)
+        ScrollView {
+            VStack(spacing: 20) {
+                Capsule()
+                    .fill(Color(.systemGray4))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 8)
 
-                    if let station = playerVM.currentStation {
-                        stationContent(station: station)
-                    } else {
-                        Text("No station selected")
-                            .foregroundStyle(.secondary)
-                            .frame(maxHeight: .infinity)
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Spacer()
                     Button("Done") { dismiss() }
+                        .foregroundStyle(.blue)
+                }
+
+                if let station = playerVM.currentStation {
+                    stationContent(station: station)
+                } else {
+                    Text("No station selected")
+                        .foregroundStyle(.secondary)
+                        .frame(maxHeight: .infinity)
                 }
             }
+            .padding(.horizontal)
         }
         .onChange(of: playerVM.currentStation == nil) { isNil in
             if isNil { dismiss() }
