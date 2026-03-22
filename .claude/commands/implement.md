@@ -5,7 +5,7 @@ argument-hint: <feature-or-area>
 
 You are implementing a feature for the LibreRadio iOS app. The user has requested: **$ARGUMENTS**
 
-Follow these 12 steps in order. Do not skip steps.
+Follow these 13 steps in order. Do not skip steps.
 
 ---
 
@@ -195,3 +195,15 @@ Re-read `SPEC.md`, `PLAN.md`, and `CHANGELOG.md` in full. Verify they are mutual
 5. **CHANGELOG.md vs SPEC.md/PLAN.md** — The changelog should not claim features that aren't documented in the spec, and shouldn't omit features that are.
 
 **Fix any inconsistencies you find.** Keep corrections minimal and factual — do not rewrite sections that are already accurate.
+
+---
+
+## Step 13: Draft Commit Message
+
+Draft a commit message for the user to review before committing. Do not commit automatically.
+
+1. Run `git diff` to review all changes made during this implementation.
+2. Write a commit message following conventional commit style:
+   - **Subject line:** concise summary of what was built (under 70 characters)
+   - **Body:** bullet list of key changes — files created, features added, tests written
+3. Present the draft commit message to the user and ask if they'd like to commit with it, edit it, or skip.
