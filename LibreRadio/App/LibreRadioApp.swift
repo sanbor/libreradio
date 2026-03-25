@@ -19,6 +19,9 @@ struct LibreRadioApp: App {
                     NowPlayingService.shared.setPlayerViewModel(playerVM)
                     NowPlayingService.shared.setFavoritesViewModel(favoritesVM)
                     LiveActivityService.shared.endOrphanedActivities()
+                    if case .idle = AudioPlayerService.shared.state {
+                        WidgetDataService.shared.clear()
+                    }
                     await ServerDiscoveryService.shared.resolveIfNeeded()
                     await favoritesVM.load()
                 }

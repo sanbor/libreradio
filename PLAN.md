@@ -361,6 +361,9 @@ LibreRadio/
 │
 ├── LibreRadioActivity/                          # Widget extension (iOS 16.2+)
 │   ├── Info.plist
+│   ├── LibreRadioActivity.entitlements          # App Group entitlement (group.org.libreradio.app)
+│   ├── RadioWidgetBundle.swift                  # @main WidgetBundle containing all widgets
+│   ├── RadioWidget.swift                        # Now Playing widget (small + medium), reads from shared UserDefaults
 │   └── RadioLiveActivityWidget.swift            # Lock screen banner + Dynamic Island + playback controls
 │
 └── LibreRadioTests/
@@ -1408,6 +1411,41 @@ struct LibreRadioApp: App {
 
 **Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 326 tests pass. Manual: only Live Activity on lock screen, no duplicates, play resumes after stop, country location displays correctly, buttons work on iOS 17+, favicon appears in lock screen and Dynamic Island.
 
+### Post-Phase: Home Screen Widget (Quick Launch)
+**Goal:** Add a visible Home Screen widget to the existing widget extension, satisfying Apple App Store Review Guideline 2.1 (reviewers could see the `com.apple.widgetkit-extension` bundle but couldn't find a widget in the gallery since only Live Activities were implemented).
+
+1. `RadioWidget.swift` — static branded widget (small + medium) with `StaticConfiguration` and `.never` refresh policy
+2. `RadioWidgetBundle.swift` — `@main` `WidgetBundle` containing `RadioWidget` + `RadioLiveActivityWidget`
+3. Remove `@main` from `RadioLiveActivityWidget` (moved to bundle)
+4. Fix deployment target: add explicit `IPHONEOS_DEPLOYMENT_TARGET: "16.2"` to extension build settings in `project.yml` and remove redundant `@available(iOS 16.2, *)` from `RadioLiveActivityWidget`
+
+**Implementation notes (Home Screen Widget):**
+- **`@available` vs deployment target:** XcodeGen's `deploymentTarget` key wasn't reliably setting `IPHONEOS_DEPLOYMENT_TARGET` in the build settings — the base project setting of 16.0 leaked through. Adding the explicit build setting fixed it and allowed removing the `@available(iOS 16.2, *)` annotation from `RadioLiveActivityWidget`.
+- **`WidgetBundleBuilder` limitations:** The `@WidgetBundleBuilder` result builder does NOT support `if #available` checks (`buildLimitedAvailability` is not implemented). You cannot conditionally include widgets based on OS version inside a `WidgetBundle.body`. All widgets must be unconditionally available at the extension's deployment target.
+- **`containerBackground` for iOS 17+:** iOS 17 requires widgets to use `.containerBackground(for: .widget)` for background rendering. Use `iOSApplicationExtension` (not `iOS`) in `#available` checks inside extension targets.
+- **No tests needed:** The widget is purely declarative SwiftUI with a trivial static timeline provider. No business logic to unit test.
+
+**Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 432 tests pass. Manual: widget appears in the Home Screen widget gallery under "LibreRadio" in both small and medium sizes.
+
+### Post-Phase: Now Playing Widget with App Group Data Sharing
+**Goal:** Replace the static Quick Launch widget with a dynamic Now Playing widget that shows the currently playing station, using App Group shared UserDefaults for data transport.
+
+1. `Shared/NowPlayingWidgetData.swift` — Codable + Equatable struct shared between app and extension
+2. `LibreRadio/App/LibreRadio.entitlements` + `LibreRadioActivity/LibreRadioActivity.entitlements` — App Group (`group.org.libreradio.app`)
+3. `LibreRadio/Services/WidgetDataService.swift` — `@MainActor final class` that writes `NowPlayingWidgetData` to shared UserDefaults and calls `WidgetCenter.shared.reloadTimelines()`
+4. Wire `WidgetDataService` into `AudioPlayerService` via init injection (same pattern as `nowPlayingService`)
+5. Rewrite `RadioWidget.swift` — `NowPlayingTimelineProvider` reads from shared UserDefaults, `NowPlayingWidgetView` shows station info or idle state
+6. Clear stale widget data on app launch in `LibreRadioApp.swift`
+
+**Implementation notes (Now Playing Widget):**
+- **App Group in dev builds:** `CODE_SIGNING_ALLOWED: "NO"` prevents actual entitlement enforcement, but `UserDefaults(suiteName:)` works in the Simulator regardless. Entitlements files are referenced via `CODE_SIGN_ENTITLEMENTS` in `project.yml` and will be embedded on App Store builds.
+- **Deduplication is essential:** Playback state changes very frequently (loading→playing→buffering→playing). `WidgetDataService` compares with `lastWrittenData` via Equatable to skip redundant writes and avoid burning WidgetKit's reload budget (~40-70/day).
+- **Favicon mirrors LiveActivityService pattern:** `fetchFavicon(for:)` uses `ImageCacheService.shared.image(for:)` + `UIGraphicsImageRenderer` 80×80 JPEG 0.7 quality. Duplicated from `LiveActivityService` intentionally — the services have different lifecycles and merging them would couple unrelated Apple platform features.
+- **`LiveActivityService.startOrUpdate()` is never called:** Discovered during implementation that Live Activities are defined but not wired up. Out of scope — should be fixed in a follow-up.
+- **Widget replaces Quick Launch:** The Now Playing widget's idle state shows the same branded layout as the old Quick Launch widget, so it still satisfies App Store Review Guideline 2.1.
+
+**Verify:** `xcodegen generate` succeeds, `xcodebuild build` succeeds, all 442 tests pass. Manual: add widget to Home Screen, play station → shows station info, stop → shows idle state.
+
 ### Post-Phase: Apple Music-style Home Redesign
 
 **Goal:** Make the Home section visually closer to Apple Music — larger typography, tighter spacing, bigger station cards, and fluid edge-to-edge layout.
@@ -1445,7 +1483,7 @@ These features can be added after the core app is stable:
 1. **Sleep Timer** — countdown timer that stops playback
 2. **Stream Recording** — capture audio to file using `AVAssetWriter`
 3. ~~**Track History**~~ — **Done.** In-memory session-scoped track history with browse controls in full player. Stored on `AudioPlayerService.trackHistory` as `[TrackHistoryItem]` (not persisted). Full player shows left/right chevrons to browse and tap-to-open history sheet. Station name fallback when no ICY metadata.
-4. **Widgets** — WidgetKit for now-playing and favorite stations
+4. **Widgets** — Now Playing widget done (dynamic, small + medium, App Group data sharing). Favorites widget still planned
 5. **Siri Shortcuts** — `AppIntent` for "Play [station name]"
 6. **Geo Search** — find stations near current location
 7. **M3U Export/Import** — share favorites as playlist files

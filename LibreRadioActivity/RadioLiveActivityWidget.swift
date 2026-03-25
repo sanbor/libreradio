@@ -2,8 +2,6 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-@available(iOS 16.2, *)
-@main
 struct RadioLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RadioActivityAttributes.self) { context in

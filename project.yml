@@ -35,6 +35,7 @@ targets:
       base:
         INFOPLIST_FILE: LibreRadio/App/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: org.libreradio.app
+        CODE_SIGN_ENTITLEMENTS: LibreRadio/App/LibreRadio.entitlements
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -86,6 +87,8 @@ targets:
       base:
         INFOPLIST_FILE: LibreRadioActivity/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: org.libreradio.app.activity
+        CODE_SIGN_ENTITLEMENTS: LibreRadioActivity/LibreRadioActivity.entitlements
+        IPHONEOS_DEPLOYMENT_TARGET: "16.2"
         GENERATE_INFOPLIST_FILE: false
         CODE_SIGNING_ALLOWED: "NO"
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"

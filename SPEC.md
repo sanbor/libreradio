@@ -530,11 +530,10 @@ Log ICY metadata (artist + track title) parsed from streams over time. Persisted
 
 #### Widgets
 
-WidgetKit home screen widgets:
-- **Now Playing widget** — shows current station name, favicon, and playback state. Tapping opens the app.
-- **Favorites widget** — shows a grid or list of favorite stations. Tapping a station launches the app and starts playback.
+WidgetKit home screen widgets in the existing `LibreRadioActivity` extension (which also hosts Live Activities). Data shared between app and widget extension via App Group (`group.org.libreradio.app`) UserDefaults.
 
-Uses `AppIntentTimelineProvider` for widget configuration. Shared data between app and widget extension via App Group container.
+- **Now Playing widget** (implemented) — shows current station name, favicon, playback state indicator, and metadata (flag + location + codec + bitrate) in small and medium sizes. Idle state shows branded "LibreRadio" / "Tap to listen" layout. `WidgetDataService` writes `NowPlayingWidgetData` to shared UserDefaults on every state change and calls `WidgetCenter.shared.reloadTimelines()`. Widget reads via `StaticConfiguration` with `.never` refresh policy (app-driven reloads). Favicon pre-compressed to 80×80 JPEG by the app before writing. Deduplicates writes via Equatable comparison.
+- **Favorites widget** (planned) — shows a grid or list of favorite stations. Tapping a station launches the app and starts playback.
 
 #### Siri Shortcuts
 

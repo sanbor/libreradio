@@ -8,6 +8,7 @@ final class AudioPlayerServiceTests: XCTestCase {
     private var discovery: ServerDiscoveryService!
     private var radioBrowserService: RadioBrowserService!
     private var nowPlayingService: NowPlayingService!
+    private var widgetDataService: WidgetDataService!
     private var service: AudioPlayerService!
 
     override func setUp() async throws {
@@ -17,10 +18,12 @@ final class AudioPlayerServiceTests: XCTestCase {
         let session = TestFixtures.makeMockSession()
         radioBrowserService = RadioBrowserService(discovery: discovery, session: session)
         nowPlayingService = NowPlayingService()
+        widgetDataService = WidgetDataService(defaults: UserDefaults(suiteName: "test-\(UUID().uuidString)"))
         service = AudioPlayerService(
             player: AVPlayer(),
             service: radioBrowserService,
-            nowPlayingService: nowPlayingService
+            nowPlayingService: nowPlayingService,
+            widgetDataService: widgetDataService
         )
 
         // Default mock handler for click tracking
