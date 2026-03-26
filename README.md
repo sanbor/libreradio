@@ -72,6 +72,10 @@ open LibreRadio.xcodeproj
 
 GitHub Actions runs build and tests on every push and PR to `main` (see `.github/workflows/ios.yml`).
 
+## Support
+
+For questions, feedback, or support requests, email [hello+libreradio@borrazas.org](mailto:hello+libreradio@borrazas.org).
+
 ## Attribution
 
 This app icon uses the svg version of [Levitating, Meditating, Flute-playing Gnu](https://www.gnu.org/graphics/meditate.html).
