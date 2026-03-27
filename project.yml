@@ -19,7 +19,6 @@ schemes:
     test:
       targets:
         - LibreRadioTests
-      gatherCoverageData: true
 
 targets:
   LibreRadio:
