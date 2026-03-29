@@ -122,7 +122,7 @@ struct StationListView: View {
             List {
                 if verticalSizeClass == .compact {
                     Color.clear
-                        .frame(height: 56)
+                        .frame(height: 28)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
@@ -152,7 +152,7 @@ struct StationListView: View {
                 }
 
                 Color.clear
-                    .frame(height: LayoutConstants.listBottomPadding)
+                    .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -169,14 +169,6 @@ struct StationListView: View {
 
     private var flatList: some View {
         List {
-            if verticalSizeClass == .compact {
-                Color.clear
-                    .frame(height: 56)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-            }
-
             if viewModel.isFetchingAll {
                 loadingAllBanner
             }
@@ -194,7 +186,7 @@ struct StationListView: View {
             }
 
             Color.clear
-                .frame(height: LayoutConstants.listBottomPadding)
+                .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
         }

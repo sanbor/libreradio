@@ -89,7 +89,7 @@ struct TagListView: View {
             List {
                 if verticalSizeClass == .compact {
                     Color.clear
-                        .frame(height: 56)
+                        .frame(height: 28)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
@@ -107,7 +107,7 @@ struct TagListView: View {
                 }
 
                 Color.clear
-                    .frame(height: LayoutConstants.listBottomPadding)
+                    .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -124,20 +124,12 @@ struct TagListView: View {
 
     private var flatList: some View {
         List {
-            if verticalSizeClass == .compact {
-                Color.clear
-                    .frame(height: 56)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-            }
-
             ForEach(filteredTags) { tag in
                 tagRow(tag)
             }
 
             Color.clear
-                .frame(height: LayoutConstants.listBottomPadding)
+                .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
         }

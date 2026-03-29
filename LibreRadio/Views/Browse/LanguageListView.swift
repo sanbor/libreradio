@@ -93,7 +93,7 @@ struct LanguageListView: View {
             List {
                 if verticalSizeClass == .compact {
                     Color.clear
-                        .frame(height: 56)
+                        .frame(height: 28)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
@@ -111,7 +111,7 @@ struct LanguageListView: View {
                 }
 
                 Color.clear
-                    .frame(height: LayoutConstants.listBottomPadding)
+                    .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -128,20 +128,12 @@ struct LanguageListView: View {
 
     private var flatList: some View {
         List {
-            if verticalSizeClass == .compact {
-                Color.clear
-                    .frame(height: 56)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-            }
-
             ForEach(filteredLanguages) { language in
                 languageRow(language)
             }
 
             Color.clear
-                .frame(height: LayoutConstants.listBottomPadding)
+                .frame(height: verticalSizeClass == .compact ? 160 : LayoutConstants.listBottomPadding)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
         }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-29 — Fix landscape spacing: search bar overlap and mini player coverage
+
+**Prompt:** `/implement the toggle for sort works great. The only detail is too much white space when the phone is in landscape position / when sorting by name in landscape mode the top item is covered by the search bar, the bottom item is covered by the playing now section`
+
+**Changes:**
+- Flat lists (clicks sort): removed landscape top spacer entirely — `.searchable(.navigationBarDrawer)` provides sufficient automatic insets
+- Alphabetical lists (name sort): set landscape top spacer to 28pt so the first alphabet index letter is fully visible below the search bar
+- Increased landscape bottom padding from 80pt to 160pt to fully clear the floating mini player
+- Portrait spacing unchanged (sort picker header + 80pt bottom padding)
+- Applied to all 4 browse views: `StationListView`, `CountryListView`, `LanguageListView`, `TagListView`
+
 ## 2026-03-29 — Fix sort picker width inconsistency between sort modes
 
 **Prompt:** `/implement [Image #14] [Image #15] when clicking sort by name the width of the toggle changes`
