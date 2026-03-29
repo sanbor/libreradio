@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct LanguageListView: View {
-    @StateObject private var viewModel = BrowseViewModel()
+    @EnvironmentObject private var viewModel: BrowseViewModel
+    @State private var searchText = ""
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         Group {
@@ -16,22 +18,26 @@ struct LanguageListView: View {
             }
         }
         .navigationTitle("Languages")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search languages")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Picker("Sort", selection: $viewModel.languagesSortOrder) {
-                    ForEach(BrowseSortOrder.allCases, id: \.self) { order in
-                        Text(order.label).tag(order)
-                    }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if verticalSizeClass == .compact {
+                    sortMenu
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
             }
         }
         .task { await viewModel.loadLanguages() }
     }
 
+    private var filteredLanguages: [Language] {
+        let sorted = viewModel.sortedLanguages
+        if searchText.isEmpty { return sorted }
+        return sorted.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     private var sectionedLanguages: [(letter: String, languages: [Language])] {
-        let grouped = Dictionary(grouping: viewModel.sortedLanguages) { language in
+        let grouped = Dictionary(grouping: filteredLanguages) { language in
             languageSectionKey(for: language.name)
         }
         return grouped.sorted { lhs, rhs in
@@ -43,12 +49,39 @@ struct LanguageListView: View {
     }
 
     private var languageList: some View {
-        Group {
+        VStack(spacing: 0) {
+            if verticalSizeClass != .compact {
+                sortPicker
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+            }
             if viewModel.languagesSortOrder == .alphabetical {
                 alphabeticalList
             } else {
                 flatList
             }
+        }
+    }
+
+    private var sortPicker: some View {
+        Picker("Sort", selection: $viewModel.languagesSortOrder) {
+            ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                Text(order.label).tag(order)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: $viewModel.languagesSortOrder) {
+                ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                    Text(order.label).tag(order)
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
         }
     }
 
@@ -58,6 +91,14 @@ struct LanguageListView: View {
 
         return ScrollViewReader { proxy in
             List {
+                if verticalSizeClass == .compact {
+                    Color.clear
+                        .frame(height: 56)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+
                 ForEach(sections, id: \.letter) { section in
                     Section {
                         ForEach(section.languages) { language in
@@ -87,7 +128,15 @@ struct LanguageListView: View {
 
     private var flatList: some View {
         List {
-            ForEach(viewModel.sortedLanguages) { language in
+            if verticalSizeClass == .compact {
+                Color.clear
+                    .frame(height: 56)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+            }
+
+            ForEach(filteredLanguages) { language in
                 languageRow(language)
             }
 

@@ -296,6 +296,165 @@ final class StationListViewModelTests: XCTestCase {
         XCTAssertEqual(sections[1].letter, "Z")
     }
 
+    // MARK: - Fetch All
+
+    func testFetchAllIfNeeded_doesNothingWhenNoMore() async {
+        setMockResponse(json: TestFixtures.stationArrayJSON(count: 5))
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertFalse(vm.hasMore)
+
+        let task = vm.fetchAllIfNeeded()
+        XCTAssertNil(task)
+        XCTAssertFalse(vm.isFetchingAll)
+    }
+
+    func testFetchAllIfNeeded_doesNothingWhenIsLoading() {
+        setMockResponse(json: TestFixtures.stationArrayJSON(count: 100))
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        vm.isLoading = true
+
+        let task = vm.fetchAllIfNeeded()
+        XCTAssertNil(task)
+        XCTAssertFalse(vm.isFetchingAll)
+    }
+
+    func testFetchAllIfNeeded_loadsAllPages() async {
+        var requestCount = 0
+        MockURLProtocol.requestHandler = { request in
+            requestCount += 1
+            let count = requestCount <= 1 ? 100 : 30
+            let startIndex = (requestCount - 1) * 100
+            let stations = (startIndex..<(startIndex + count)).map { i in
+                TestFixtures.stationJSON(uuid: "uuid-\(i)", name: "Station \(i)")
+            }
+            let json = "[\(stations.joined(separator: ","))]"
+            let data = json.data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertEqual(vm.stations.count, 100)
+        XCTAssertTrue(vm.hasMore)
+
+        let task = vm.fetchAllIfNeeded()
+        XCTAssertNotNil(task)
+        XCTAssertTrue(vm.isFetchingAll)
+
+        await task?.value
+
+        XCTAssertFalse(vm.isFetchingAll)
+        XCTAssertEqual(vm.stations.count, 130)
+        XCTAssertFalse(vm.hasMore)
+    }
+
+    func testFetchAllIfNeeded_stopsOnError() async {
+        var requestCount = 0
+        MockURLProtocol.requestHandler = { request in
+            requestCount += 1
+            if requestCount <= 1 {
+                let data = TestFixtures.stationArrayJSON(count: 100).data(using: .utf8)!
+                let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                return (response, data)
+            }
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertTrue(vm.hasMore)
+
+        let task = vm.fetchAllIfNeeded()
+        await task?.value
+
+        XCTAssertFalse(vm.isFetchingAll)
+        XCTAssertNotNil(vm.error)
+        XCTAssertEqual(vm.stations.count, 100)
+    }
+
+    func testFetchAllIfNeeded_isNopWhenAlreadyFetching() async {
+        var requestCount = 0
+        MockURLProtocol.requestHandler = { request in
+            requestCount += 1
+            let count = requestCount <= 1 ? 100 : 30
+            let startIndex = (requestCount - 1) * 100
+            let stations = (startIndex..<(startIndex + count)).map { i in
+                TestFixtures.stationJSON(uuid: "uuid-\(i)", name: "Station \(i)")
+            }
+            let json = "[\(stations.joined(separator: ","))]"
+            let data = json.data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertTrue(vm.hasMore)
+
+        let task1 = vm.fetchAllIfNeeded()
+        XCTAssertNotNil(task1)
+        XCTAssertTrue(vm.isFetchingAll)
+
+        // Second call while already fetching should return nil
+        let task2 = vm.fetchAllIfNeeded()
+        XCTAssertNil(task2)
+
+        await task1?.value
+        XCTAssertFalse(vm.isFetchingAll)
+    }
+
+    func testLoadCancelsFetchAll() async {
+        var requestCount = 0
+        MockURLProtocol.requestHandler = { request in
+            requestCount += 1
+            let data = TestFixtures.stationArrayJSON(count: 100).data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertTrue(vm.hasMore)
+
+        let fetchTask = vm.fetchAllIfNeeded()
+        XCTAssertTrue(vm.isFetchingAll)
+
+        // load() should cancel the fetchAll task
+        await vm.load()
+        XCTAssertFalse(vm.isFetchingAll)
+
+        await fetchTask?.value
+        XCTAssertFalse(vm.isFetchingAll)
+    }
+
+    func testReloadForSortCancelsFetchAll() async {
+        var requestCount = 0
+        MockURLProtocol.requestHandler = { request in
+            requestCount += 1
+            let data = TestFixtures.stationArrayJSON(count: 100).data(using: .utf8)!
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+
+        let vm = StationListViewModel(filter: .country("AR"), service: service)
+        await vm.load()
+        XCTAssertTrue(vm.hasMore)
+
+        let fetchTask = vm.fetchAllIfNeeded()
+        XCTAssertTrue(vm.isFetchingAll)
+
+        // reloadForCurrentSort() should cancel the fetchAll task
+        await vm.reloadForCurrentSort()
+        XCTAssertFalse(vm.isFetchingAll)
+
+        await fetchTask?.value
+        XCTAssertFalse(vm.isFetchingAll)
+    }
+
     // MARK: - Helpers
 
     private func setMockResponse(json: String) {

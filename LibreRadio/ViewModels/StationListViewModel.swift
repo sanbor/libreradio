@@ -17,10 +17,12 @@ final class StationListViewModel: ObservableObject {
     @Published var error: AppError?
     @Published var hasMore = true
     @Published var sortOrder: StationSortOrder = .byClicks
+    @Published private(set) var isFetchingAll = false
 
     private var currentOffset = 0
     private let pageSize = 100
     private let service: RadioBrowserService
+    private var fetchAllTask: Task<Void, Never>?
 
     init(filter: Filter, title: String? = nil, service: RadioBrowserService = .shared) {
         self.filter = filter
@@ -41,6 +43,7 @@ final class StationListViewModel: ObservableObject {
     }
 
     func load() async {
+        cancelFetchAll()
         guard !isLoading else { return }
         isLoading = true
         error = nil
@@ -80,12 +83,31 @@ final class StationListViewModel: ObservableObject {
     }
 
     func reloadForCurrentSort() async {
+        cancelFetchAll()
         isLoading = false
         stations = []
         hasMore = true
         currentOffset = 0
         error = nil
         await load()
+    }
+
+    /// Fetches all remaining pages in the background. Safe to call multiple times;
+    /// a second call while already fetching is a no-op. Does not block — the caller
+    /// can discard the returned Task or await it in tests.
+    @discardableResult
+    func fetchAllIfNeeded() -> Task<Void, Never>? {
+        guard hasMore, !isFetchingAll, !isLoading else { return nil }
+        isFetchingAll = true
+        let task = Task {
+            defer { isFetchingAll = false }
+            while hasMore && !Task.isCancelled {
+                await loadMore()
+                if error != nil { break }
+            }
+        }
+        fetchAllTask = task
+        return task
     }
 
     var sectionedStations: [(letter: String, stations: [StationDTO])] {
@@ -95,6 +117,12 @@ final class StationListViewModel: ObservableObject {
         }
         return grouped.sorted { $0.key < $1.key }
             .map { (letter: $0.key, stations: $0.value) }
+    }
+
+    private func cancelFetchAll() {
+        fetchAllTask?.cancel()
+        fetchAllTask = nil
+        isFetchingAll = false
     }
 
     private func fetchStations(offset: Int) async throws -> [StationDTO] {

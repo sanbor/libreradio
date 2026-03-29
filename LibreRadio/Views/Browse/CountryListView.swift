@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct CountryListView: View {
-    @StateObject private var viewModel = BrowseViewModel()
+    @EnvironmentObject private var viewModel: BrowseViewModel
     @State private var searchText = ""
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         Group {
@@ -17,16 +18,13 @@ struct CountryListView: View {
             }
         }
         .navigationTitle("Countries")
-        .searchable(text: $searchText, prompt: "Search countries")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search countries")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Picker("Sort", selection: $viewModel.countrySortOrder) {
-                    ForEach(BrowseSortOrder.allCases, id: \.self) { order in
-                        Text(order.label).tag(order)
-                    }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if verticalSizeClass == .compact {
+                    sortMenu
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
             }
         }
         .task { await viewModel.loadCountries() }
@@ -51,12 +49,39 @@ struct CountryListView: View {
     }
 
     private var countryList: some View {
-        Group {
+        VStack(spacing: 0) {
+            if verticalSizeClass != .compact {
+                sortPicker
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+            }
             if viewModel.countrySortOrder == .alphabetical {
                 alphabeticalList
             } else {
                 flatList
             }
+        }
+    }
+
+    private var sortPicker: some View {
+        Picker("Sort", selection: $viewModel.countrySortOrder) {
+            ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                Text(order.label).tag(order)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: $viewModel.countrySortOrder) {
+                ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                    Text(order.label).tag(order)
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
         }
     }
 
@@ -66,6 +91,14 @@ struct CountryListView: View {
 
         return ScrollViewReader { proxy in
             List {
+                if verticalSizeClass == .compact {
+                    Color.clear
+                        .frame(height: 56)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+
                 ForEach(sections, id: \.letter) { section in
                     Section {
                         ForEach(section.countries) { country in
@@ -95,6 +128,14 @@ struct CountryListView: View {
 
     private var flatList: some View {
         List {
+            if verticalSizeClass == .compact {
+                Color.clear
+                    .frame(height: 56)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+            }
+
             ForEach(filteredCountries) { country in
                 countryRow(country)
             }

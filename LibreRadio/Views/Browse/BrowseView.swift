@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct BrowseView: View {
+    @StateObject private var viewModel = BrowseViewModel()
+
     var body: some View {
         NavigationStack {
             List {
@@ -24,5 +26,6 @@ struct BrowseView: View {
             }
             .navigationTitle("Browse")
         }
+        .environmentObject(viewModel)
     }
 }

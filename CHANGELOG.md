@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-03-29 — Fix sort picker width inconsistency between sort modes
+
+**Prompt:** `/implement [Image #14] [Image #15] when clicking sort by name the width of the toggle changes`
+
+**Changes:**
+- Moved `sortPicker` out of `alphabeticalList`/`flatList` list rows and into the parent computed property (`countryList`, `languageList`, `tagList`, `stationList`) as a `VStack(spacing: 0)` header
+- Picker is now above the `List` and outside `AlphabetIndexView`'s `.safeAreaInset(edge: .trailing)` scope — always full-width regardless of sort mode
+- Removed `.listRowBackground(Color.clear)` and `.listRowSeparator(.hidden)` from `sortPicker` (no longer a list row); added `.padding(.horizontal, 16).padding(.vertical, 8)` for consistent alignment
+- In both `alphabeticalList` and `flatList`: the `if/else` sort picker block is replaced with landscape-only 56pt `Color.clear` spacer (portrait picker is now the VStack header)
+- Applied to `CountryListView`, `LanguageListView`, `TagListView`, `StationListView`
+
+## 2026-03-29 — Fix large gap when sorting by name in landscape
+
+**Prompt:** `/implement [Image #11] when sorting by name there is a large gap`
+
+**Changes:**
+- Replaced the invisible `sortPicker` spacer row (used in landscape to prevent content from hiding behind the search bar) with an explicit `Color.clear.frame(height: 56).listRowInsets(EdgeInsets())` spacer
+- Root cause: in iOS 26, `Picker` with `.pickerStyle(.segmented)` renders ~80–100pt tall (vs ~48pt in earlier iOS), making the transparent spacer create a visually obvious empty region
+- The 56pt explicit spacer is just enough to push section headers below the search drawer (~6pt visible gap), eliminating the large blank area
+- Applied to `alphabeticalList` and `flatList` in `CountryListView`, `LanguageListView`, `TagListView`, `StationListView`
+
+## 2026-03-28 — Fix first country unclickable and sort toggle double-edge in landscape
+
+**Prompt:** `/implement [Image #10] the first country can't be clicked and there is an artifact in the edges of the sort toggle (looks like double edges)`
+
+**Changes:**
+- Added `@Environment(\.verticalSizeClass)` to all four browse views
+- Portrait: sort picker restored as first list row (original behavior, spacing below search bar preserved)
+- Landscape (`verticalSizeClass == .compact`): sort picker row is kept but rendered invisible (`.opacity(0)`, `.disabled`, `.accessibilityHidden`) — maintains the spacing buffer that prevents the first country row from being covered by the search bar
+- Landscape: added `sortMenu` — a compact `Menu { Picker }` toolbar button with an `arrow.up.arrow.down` icon — replacing the segmented picker in the toolbar, which caused a double-edge artifact from iOS 26's glass pill container wrapping around the segmented control's own border
+
+## 2026-03-28 — Fix sort toggle inaccessible in landscape mode
+
+**Prompt:** `/implement [Image #9] when the phone is in landscape I can't toggle between name and click sort modes`
+
+**Changes:**
+- Moved `sortPicker` from first `List` row to `ToolbarItem(placement: .navigationBarTrailing)` in `CountryListView`, `LanguageListView`, `TagListView`, and `StationListView`
+- Root cause: in landscape mode, `searchable(placement: .navigationBarDrawer(displayMode: .always))` causes the first list row to render behind the navigation bar chrome; the segmented control segments were visible but untappable
+- Removed list-specific modifiers (`.listRowBackground`, `.listRowSeparator`) from `sortPicker` since it no longer lives inside a `List`
+- Sort toggle is now always accessible in both portrait and landscape from the navigation bar trailing area
+
+## 2026-03-28 — Always-visible search bar and browse UX improvements
+
+**Prompt:** `/implement [Image #5] sometimes the top search bar is not shown when entering a browse section, make it always visible`
+
+**Changes:**
+- Added `placement: .navigationBarDrawer(displayMode: .always)` to `.searchable()` in `CountryListView`, `LanguageListView`, `TagListView`, and `StationListView` — search bar is now pinned below the navigation title at all times
+- Added `.navigationBarTitleDisplayMode(.inline)` to all 4 list views — compact nav bar keeps the sort picker row consistently accessible in both portrait and landscape
+- `BrowseView` now owns a single `BrowseViewModel` shared across Countries, Languages, and Tags via `@EnvironmentObject` — switching between sections no longer re-fetches data
+- Replaced `onChange(of: searchText)` with a 300 ms debounced `task(id:)` in `StationListView` — `fetchAllIfNeeded` is no longer triggered on every keystroke
+
 ## 2026-03-26 — Default antenna artwork on lock screen
 
 **Prompt:** `/implement show a default radio antenna artwork on lock screen when station has no favicon`

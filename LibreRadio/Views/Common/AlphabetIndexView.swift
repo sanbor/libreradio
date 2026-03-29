@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AlphabetIndexView: View {
     let letters: [String]
+    var isLoading: Bool = false
     let onSelect: (String) -> Void
 
     private static let letterHeight: CGFloat = 16
@@ -12,12 +13,12 @@ struct AlphabetIndexView: View {
             ForEach(letters, id: \.self) { letter in
                 Text(letter)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(isLoading ? Color.secondary : Color.blue)
                     .frame(width: Self.letterHeight, height: Self.letterHeight)
-                    .onTapGesture { onSelect(letter) }
                     .accessibilityLabel(letter)
                     .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Jump to section \(letter)")
+                    .accessibilityAction { onSelect(letter) }
             }
         }
         .padding(.vertical, Self.verticalPadding)
@@ -34,14 +35,15 @@ struct AlphabetIndexView: View {
     }
 
     /// Calculates the letter index for a given Y coordinate within the alphabet index.
-    /// Extracted as a static function for testability.
+    /// Each letter occupies exactly `letterHeight` points, starting after `verticalPadding`.
+    /// Values in the bottom padding area clamp to the last valid index.
+    /// Values entirely outside the view's total height return nil.
     static func letterIndex(forY y: CGFloat, letterCount: Int) -> Int? {
         guard letterCount > 0 else { return nil }
         let totalHeight = CGFloat(letterCount) * letterHeight + verticalPadding * 2
+        guard y < totalHeight else { return nil }
         let adjustedY = y - verticalPadding
         guard adjustedY >= 0 else { return nil }
-        let index = Int(adjustedY / (totalHeight / CGFloat(letterCount)))
-        guard index >= 0, index < letterCount else { return nil }
-        return index
+        return min(Int(adjustedY / letterHeight), letterCount - 1)
     }
 }

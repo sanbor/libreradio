@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct TagListView: View {
-    @StateObject private var viewModel = BrowseViewModel()
+    @EnvironmentObject private var viewModel: BrowseViewModel
+    @State private var searchText = ""
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         Group {
@@ -16,22 +18,26 @@ struct TagListView: View {
             }
         }
         .navigationTitle("Tags")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search tags")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Picker("Sort", selection: $viewModel.tagsSortOrder) {
-                    ForEach(BrowseSortOrder.allCases, id: \.self) { order in
-                        Text(order.label).tag(order)
-                    }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if verticalSizeClass == .compact {
+                    sortMenu
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
             }
         }
         .task { await viewModel.loadTags() }
     }
 
+    private var filteredTags: [Tag] {
+        let sorted = viewModel.sortedTags
+        if searchText.isEmpty { return sorted }
+        return sorted.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     private var sectionedTags: [(letter: String, tags: [Tag])] {
-        let grouped = Dictionary(grouping: viewModel.sortedTags) { tag in
+        let grouped = Dictionary(grouping: filteredTags) { tag in
             String(tag.name.prefix(1)).uppercased()
         }
         return grouped.sorted { $0.key < $1.key }
@@ -39,12 +45,39 @@ struct TagListView: View {
     }
 
     private var tagList: some View {
-        Group {
+        VStack(spacing: 0) {
+            if verticalSizeClass != .compact {
+                sortPicker
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+            }
             if viewModel.tagsSortOrder == .alphabetical {
                 alphabeticalList
             } else {
                 flatList
             }
+        }
+    }
+
+    private var sortPicker: some View {
+        Picker("Sort", selection: $viewModel.tagsSortOrder) {
+            ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                Text(order.label).tag(order)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: $viewModel.tagsSortOrder) {
+                ForEach(BrowseSortOrder.allCases, id: \.self) { order in
+                    Text(order.label).tag(order)
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
         }
     }
 
@@ -54,6 +87,14 @@ struct TagListView: View {
 
         return ScrollViewReader { proxy in
             List {
+                if verticalSizeClass == .compact {
+                    Color.clear
+                        .frame(height: 56)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+
                 ForEach(sections, id: \.letter) { section in
                     Section {
                         ForEach(section.tags) { tag in
@@ -83,7 +124,15 @@ struct TagListView: View {
 
     private var flatList: some View {
         List {
-            ForEach(viewModel.sortedTags) { tag in
+            if verticalSizeClass == .compact {
+                Color.clear
+                    .frame(height: 56)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+            }
+
+            ForEach(filteredTags) { tag in
                 tagRow(tag)
             }
 

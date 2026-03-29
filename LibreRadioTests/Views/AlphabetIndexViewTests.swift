@@ -6,13 +6,14 @@ final class AlphabetIndexViewTests: XCTestCase {
     // MARK: - letterIndex(forY:letterCount:)
 
     func testIndexAtTopReturnsZero() {
-        // Y just inside the top padding
+        // Y just inside the top padding (4pt). Letter 0 starts at adjustedY=0.
         let index = AlphabetIndexView.letterIndex(forY: 5, letterCount: 26)
         XCTAssertEqual(index, 0)
     }
 
     func testIndexAtBottomReturnsLastIndex() {
-        // 26 letters × 16pt + 8pt padding = 424pt total. Last letter center ≈ 420pt
+        // 26 letters × 16pt each + 4pt top padding = last letter ends at y=419.
+        // y=420 falls in the 4pt bottom padding, which clamps to the last letter.
         let index = AlphabetIndexView.letterIndex(forY: 420, letterCount: 26)
         XCTAssertEqual(index, 25)
     }
@@ -23,13 +24,13 @@ final class AlphabetIndexViewTests: XCTestCase {
     }
 
     func testIndexBelowRangeReturnsNil() {
+        // y=500 is past the total view height (26*16+8=424), so it returns nil.
         let index = AlphabetIndexView.letterIndex(forY: 500, letterCount: 26)
         XCTAssertNil(index)
     }
 
     func testIndexInMiddleReturnsCorrectIndex() {
-        // For 5 letters: total = 5*16+8 = 88. Each letter ≈ 17.6pt.
-        // Y = 30 → adjusted = 26 → 26 / (88/5) = 26/17.6 = 1.47 → Int = 1
+        // For 5 letters, each 16pt. Y=30 → adjustedY=26 → Int(26/16)=1.
         let index = AlphabetIndexView.letterIndex(forY: 30, letterCount: 5)
         XCTAssertEqual(index, 1)
     }
@@ -40,19 +41,20 @@ final class AlphabetIndexViewTests: XCTestCase {
     }
 
     func testSingleLetterReturnsZero() {
-        // 1 letter: total = 1*16+8 = 24. Y=5 → adjusted=1 → 1/(24/1) = 0.04 → 0
+        // 1 letter: occupies y=4–19. Y=5 → adjustedY=1 → Int(1/16)=0.
         let index = AlphabetIndexView.letterIndex(forY: 5, letterCount: 1)
         XCTAssertEqual(index, 0)
     }
 
     func testSingleLetterOutOfRangeReturnsNil() {
+        // 1 letter: total height = 1*16+8 = 24. y=30 >= 24 → nil.
         let index = AlphabetIndexView.letterIndex(forY: 30, letterCount: 1)
         XCTAssertNil(index)
     }
 
     func testExactBoundaryReturnsCorrectIndex() {
-        // For 3 letters: total = 3*16+8 = 56. Each letter = 56/3 ≈ 18.67.
-        // Y at padding boundary (4) → adjusted = 0 → 0 / 18.67 = 0
+        // For 3 letters, each 16pt, starting at y=4 (top padding).
+        // Y=4 → adjustedY=0 → Int(0/16)=0.
         let index = AlphabetIndexView.letterIndex(forY: 4, letterCount: 3)
         XCTAssertEqual(index, 0)
     }
