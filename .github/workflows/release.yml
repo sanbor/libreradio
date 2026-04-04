@@ -3,7 +3,10 @@ name: Release macOS
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
 
 permissions:
   contents: write
@@ -17,6 +20,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main branch
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag does not point to a commit on main — aborting release"
+            exit 1
+          fi
 
       - name: Generate Xcode project
         run: |
@@ -25,8 +37,10 @@ jobs:
           echo "xcodegen version: $INSTALLED_VERSION"
           EXPECTED_CHECKSUM="$(brew info --json=v2 xcodegen | python3 -c "import sys,json; print(json.load(sys.stdin)['formulae'][0]['bottle']['stable']['files'].popitem()[1]['sha256'])")"
           ACTUAL_CHECKSUM="$(shasum -a 256 "$(brew --cellar xcodegen)/../.bottle/xcodegen"*.tar.gz 2>/dev/null | awk '{print $1}' || echo 'skip')"
-          echo "Expected: $EXPECTED_CHECKSUM"
-          echo "Actual: $ACTUAL_CHECKSUM"
+          if [ "$ACTUAL_CHECKSUM" = "skip" ] || [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+            echo "::error::xcodegen bottle checksum mismatch (expected: $EXPECTED_CHECKSUM, actual: $ACTUAL_CHECKSUM)"
+            exit 1
+          fi
           xcodegen generate
 
       - name: Install signing certificate
@@ -44,7 +58,7 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$CERTIFICATE_PWD" -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security
+          security import "$CERT_PATH" -P "$CERTIFICATE_PWD" -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
 
@@ -84,10 +98,10 @@ jobs:
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" \
-            --wait | tee "$RUNNER_TEMP/notarization.log"
+            --wait > "$RUNNER_TEMP/notarization.log" 2>&1
           if ! grep -q "status: Accepted" "$RUNNER_TEMP/notarization.log"; then
             echo "::error::Notarization was not accepted"
-            cat "$RUNNER_TEMP/notarization.log"
+            grep -v -i "apple-id\|password" "$RUNNER_TEMP/notarization.log" || true
             exit 1
           fi
 
@@ -95,6 +109,8 @@ jobs:
         run: |
           APP_PATH="build/Build/Products/Release-maccatalyst/LibreRadio.app"
           xcrun stapler staple "$APP_PATH"
+          xcrun stapler validate "$APP_PATH"
+          spctl --assess --type execute --verbose "$APP_PATH"
           rm LibreRadio-macOS.zip
           ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS.zip
 
@@ -106,7 +122,8 @@ jobs:
 
       - name: Sign DMG
         run: |
-          codesign --force --sign "Developer ID Application" LibreRadio-macOS.dmg
+          codesign --force --sign "Developer ID Application" \
+            --timestamp LibreRadio-macOS.dmg
 
       - name: Notarize DMG
         env:
@@ -118,13 +135,15 @@ jobs:
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" \
-            --wait | tee "$RUNNER_TEMP/dmg-notarization.log"
+            --wait > "$RUNNER_TEMP/dmg-notarization.log" 2>&1
           if ! grep -q "status: Accepted" "$RUNNER_TEMP/dmg-notarization.log"; then
             echo "::error::DMG notarization was not accepted"
-            cat "$RUNNER_TEMP/dmg-notarization.log"
+            grep -v -i "apple-id\|password" "$RUNNER_TEMP/dmg-notarization.log" || true
             exit 1
           fi
           xcrun stapler staple LibreRadio-macOS.dmg
+          xcrun stapler validate LibreRadio-macOS.dmg
+          codesign --verify --deep --strict LibreRadio-macOS.dmg
 
       - name: Compute checksums
         run: |
@@ -137,7 +156,7 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
         run: |
           PRERELEASE=""
-          if [[ "$TAG_NAME" == *-beta* || "$TAG_NAME" == *-rc* || "$TAG_NAME" == *-alpha* ]]; then
+          if [[ "$TAG_NAME" == *-beta.* || "$TAG_NAME" == *-rc.* || "$TAG_NAME" == *-alpha.* ]]; then
             PRERELEASE="--prerelease"
           fi
           gh release create "$TAG_NAME" \
@@ -147,7 +166,7 @@ jobs:
             LibreRadio-macOS.dmg.sha256 \
             --title "LibreRadio $TAG_NAME" \
             --generate-notes \
-            $PRERELEASE
+            ${PRERELEASE:+"$PRERELEASE"}
 
       - name: Clean up keychain
         if: always()
