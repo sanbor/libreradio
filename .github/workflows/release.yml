@@ -11,7 +11,8 @@ permissions:
 jobs:
   release:
     name: Build, sign, notarize, and release macOS (Mac Catalyst)
-    runs-on: macos-latest
+    runs-on: macos-15
+    environment: release
 
     steps:
       - name: Checkout
@@ -19,7 +20,7 @@ jobs:
 
       - name: Generate Xcode project
         run: |
-          brew install xcodegen
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install xcodegen
           xcodegen generate
 
       - name: Install signing certificate
@@ -36,7 +37,7 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$CERTIFICATE_PWD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$CERTIFICATE_PWD" -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
 
@@ -75,16 +76,22 @@ jobs:
           rm LibreRadio-macOS.zip
           ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS.zip
 
+      - name: Compute checksum
+        run: shasum -a 256 LibreRadio-macOS.zip > LibreRadio-macOS.zip.sha256
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" \
+          gh release create "$TAG_NAME" \
             LibreRadio-macOS.zip \
-            --title "LibreRadio ${{ github.ref_name }}" \
+            LibreRadio-macOS.zip.sha256 \
+            --title "LibreRadio $TAG_NAME" \
             --generate-notes
 
       - name: Clean up keychain
         if: always()
         run: |
+          rm -f "$RUNNER_TEMP/certificate.p12"
           security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
