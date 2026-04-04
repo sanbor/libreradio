@@ -76,19 +76,34 @@ jobs:
           rm LibreRadio-macOS.zip
           ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS.zip
 
-      - name: Compute checksum
-        run: shasum -a 256 LibreRadio-macOS.zip > LibreRadio-macOS.zip.sha256
+      - name: Create DMG
+        run: |
+          APP_PATH="build/Build/Products/Release-maccatalyst/LibreRadio.app"
+          hdiutil create -volname LibreRadio -srcfolder "$APP_PATH" \
+            -ov -format UDZO LibreRadio-macOS.dmg
+
+      - name: Compute checksums
+        run: |
+          shasum -a 256 LibreRadio-macOS.zip > LibreRadio-macOS.zip.sha256
+          shasum -a 256 LibreRadio-macOS.dmg > LibreRadio-macOS.dmg.sha256
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.ref_name }}
         run: |
+          PRERELEASE=""
+          if [[ "$TAG_NAME" == *-beta* || "$TAG_NAME" == *-rc* || "$TAG_NAME" == *-alpha* ]]; then
+            PRERELEASE="--prerelease"
+          fi
           gh release create "$TAG_NAME" \
             LibreRadio-macOS.zip \
             LibreRadio-macOS.zip.sha256 \
+            LibreRadio-macOS.dmg \
+            LibreRadio-macOS.dmg.sha256 \
             --title "LibreRadio $TAG_NAME" \
-            --generate-notes
+            --generate-notes \
+            $PRERELEASE
 
       - name: Clean up keychain
         if: always()
