@@ -68,6 +68,8 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            ENABLE_HARDENED_RUNTIME=YES \
+            OTHER_CODE_SIGN_FLAGS="--timestamp" \
             -quiet
 
       - name: Verify code signature
@@ -86,14 +88,23 @@ jobs:
           APPLE_ID_PWD: ${{ secrets.APPLE_ID_PWD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          SUBMIT_LOG="$RUNNER_TEMP/notarization.log"
           xcrun notarytool submit LibreRadio-macOS.zip \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" \
-            --wait > "$RUNNER_TEMP/notarization.log" 2>&1
-          if ! grep -q "status: Accepted" "$RUNNER_TEMP/notarization.log"; then
+            --wait > "$SUBMIT_LOG" 2>&1 || true
+          SUBMIT_ID=$(awk '/^  id: / {print $2; exit}' "$SUBMIT_LOG")
+          if ! grep -q "status: Accepted" "$SUBMIT_LOG"; then
             echo "::error::Notarization was not accepted"
-            grep -v -i "apple-id\|password" "$RUNNER_TEMP/notarization.log" || true
+            grep -v -i "apple-id\|password" "$SUBMIT_LOG" || true
+            if [ -n "$SUBMIT_ID" ]; then
+              echo "--- Apple notary log for $SUBMIT_ID ---"
+              xcrun notarytool log "$SUBMIT_ID" \
+                --apple-id "$APPLE_ID" \
+                --password "$APPLE_ID_PWD" \
+                --team-id "$APPLE_TEAM_ID" || true
+            fi
             exit 1
           fi
 
@@ -123,14 +134,23 @@ jobs:
           APPLE_ID_PWD: ${{ secrets.APPLE_ID_PWD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          DMG_LOG="$RUNNER_TEMP/dmg-notarization.log"
           xcrun notarytool submit LibreRadio-macOS.dmg \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" \
-            --wait > "$RUNNER_TEMP/dmg-notarization.log" 2>&1
-          if ! grep -q "status: Accepted" "$RUNNER_TEMP/dmg-notarization.log"; then
+            --wait > "$DMG_LOG" 2>&1 || true
+          DMG_SUBMIT_ID=$(awk '/^  id: / {print $2; exit}' "$DMG_LOG")
+          if ! grep -q "status: Accepted" "$DMG_LOG"; then
             echo "::error::DMG notarization was not accepted"
-            grep -v -i "apple-id\|password" "$RUNNER_TEMP/dmg-notarization.log" || true
+            grep -v -i "apple-id\|password" "$DMG_LOG" || true
+            if [ -n "$DMG_SUBMIT_ID" ]; then
+              echo "--- Apple notary log for $DMG_SUBMIT_ID ---"
+              xcrun notarytool log "$DMG_SUBMIT_ID" \
+                --apple-id "$APPLE_ID" \
+                --password "$APPLE_ID_PWD" \
+                --team-id "$APPLE_TEAM_ID" || true
+            fi
             exit 1
           fi
           xcrun stapler staple LibreRadio-macOS.dmg
