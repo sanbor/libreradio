@@ -460,6 +460,109 @@ final class AudioPlayerServiceTests: XCTestCase {
         XCTAssertEqual(service.currentTrackTitle, "Back In Black - Live")
     }
 
+    func testMetadataHandlerAcceptsICYStreamTitleIdentifier() {
+        // Regression test: commit aa62ee9 replaced timedMetadata KVO with
+        // AVPlayerItemMetadataOutput and filtered on `.commonIdentifierTitle`
+        // only, which silently dropped ICY stream metadata (Shoutcast/Icecast)
+        // because ICY items arrive with identifier `.icyMetadataStreamTitle`.
+        XCTAssertTrue(MetadataOutputHandler.titleIdentifiers.contains(.icyMetadataStreamTitle))
+        XCTAssertTrue(MetadataOutputHandler.titleIdentifiers.contains(.commonIdentifierTitle))
+    }
+
+    func testMetadataHandlerProcessesICYStreamTitle() async throws {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        let handler = MetadataOutputHandler()
+        handler.service = service
+
+        let metadataItem = AVMutableMetadataItem()
+        metadataItem.identifier = .icyMetadataStreamTitle
+        metadataItem.value = "Pink Floyd - Wish You Were Here" as NSString
+
+        let group = AVTimedMetadataGroup(
+            items: [metadataItem],
+            timeRange: CMTimeRange(
+                start: .zero,
+                duration: CMTime(seconds: 1, preferredTimescale: 1)
+            )
+        )
+
+        let dummyOutput = AVPlayerItemMetadataOutput(identifiers: nil)
+        handler.metadataOutput(dummyOutput, didOutputTimedMetadataGroups: [group], from: nil)
+
+        // Delegate dispatches to Task { @MainActor in ... }; yield briefly.
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertEqual(service.currentArtist, "Pink Floyd")
+        XCTAssertEqual(service.currentTrackTitle, "Wish You Were Here")
+    }
+
+    func testMetadataHandlerLogsUnrecognizedIdentifier() async throws {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        let captured = CapturedIdentifiers()
+        let handler = MetadataOutputHandler(logUnrecognizedIdentifier: { identifier in
+            captured.append(identifier)
+        })
+        handler.service = service
+
+        let metadataItem = AVMutableMetadataItem()
+        metadataItem.identifier = .commonIdentifierAlbumName  // not in titleIdentifiers
+        metadataItem.value = "Some Album" as NSString
+
+        let group = AVTimedMetadataGroup(
+            items: [metadataItem],
+            timeRange: CMTimeRange(
+                start: .zero,
+                duration: CMTime(seconds: 1, preferredTimescale: 1)
+            )
+        )
+
+        let dummyOutput = AVPlayerItemMetadataOutput(identifiers: nil)
+        handler.metadataOutput(dummyOutput, didOutputTimedMetadataGroups: [group], from: nil)
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertEqual(captured.values, [.commonIdentifierAlbumName])
+        // Unrecognized item must not be parsed as a track title.
+        XCTAssertNil(service.currentTrackTitle)
+        XCTAssertNil(service.currentArtist)
+    }
+
+    func testMetadataHandlerDoesNotLogRecognizedIdentifier() async throws {
+        let station = TestFixtures.makeStation()
+        service.play(station: station)
+
+        let captured = CapturedIdentifiers()
+        let handler = MetadataOutputHandler(logUnrecognizedIdentifier: { identifier in
+            captured.append(identifier)
+        })
+        handler.service = service
+
+        let metadataItem = AVMutableMetadataItem()
+        metadataItem.identifier = .icyMetadataStreamTitle
+        metadataItem.value = "Beatles - Let It Be" as NSString
+
+        let group = AVTimedMetadataGroup(
+            items: [metadataItem],
+            timeRange: CMTimeRange(
+                start: .zero,
+                duration: CMTime(seconds: 1, preferredTimescale: 1)
+            )
+        )
+
+        let dummyOutput = AVPlayerItemMetadataOutput(identifiers: nil)
+        handler.metadataOutput(dummyOutput, didOutputTimedMetadataGroups: [group], from: nil)
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertTrue(captured.values.isEmpty)
+        XCTAssertEqual(service.currentArtist, "Beatles")
+        XCTAssertEqual(service.currentTrackTitle, "Let It Be")
+    }
+
     func testTimedMetadataUpdatesTrackTitle() {
         let station = TestFixtures.makeStation()
         service.play(station: station)
@@ -550,5 +653,16 @@ final class AudioPlayerServiceTests: XCTestCase {
 
         service.clearTrackHistory()
         XCTAssertTrue(service.trackHistory.isEmpty)
+    }
+}
+
+/// Reference-type capture for `MetadataOutputHandler` log closure assertions.
+/// Not Sendable/thread-safe by design — tests drive the handler synchronously
+/// on the main thread, so no cross-thread access occurs.
+private final class CapturedIdentifiers {
+    var values: [AVMetadataIdentifier] = []
+
+    func append(_ identifier: AVMetadataIdentifier) {
+        values.append(identifier)
     }
 }

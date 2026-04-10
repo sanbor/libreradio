@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-04-10 — Log dropped metadata items with unrecognized identifiers
+
+**Prompt:** `/implement add a debug log when MetadataOutputHandler drops an item with an unrecognized identifier`
+
+**Changes:**
+- `LibreRadio/Services/AudioPlayerService.swift`: `MetadataOutputHandler` now emits an `os.Logger` `.debug` message (subsystem `com.libreradio`, category `MetadataOutputHandler`) for every timed metadata item whose identifier is non-nil but not in `titleIdentifiers`. Items with `nil` identifiers are not logged (AVFoundation no-op case). The log closure is injected via a new `MetadataOutputHandler(logUnrecognizedIdentifier:)` initializer so tests can capture identifiers directly instead of scraping the unified logging system; the default binds to a `static let logger` to avoid allocating a `Logger` per dropped item
+- `LibreRadioTests/Services/AudioPlayerServiceTests.swift`: added `testMetadataHandlerLogsUnrecognizedIdentifier` (drives a synthetic `.commonIdentifierAlbumName` item through the delegate and asserts the log captured the identifier and the track title/artist remain nil) and `testMetadataHandlerDoesNotLogRecognizedIdentifier` (ICY item is parsed normally and the log is not invoked). Added a file-private `CapturedIdentifiers` reference-type helper to support the assertions
+- `PLAN.md`: added a Phase 2 implementation note documenting the debug-log rationale and the injectable-closure testing pattern
+
+## 2026-04-10 — Restore ICY artist/song display from radio streams
+
+**Prompt:** `/implement previously current tracks were shown. The functionality stopped worked at some point. Show ICY name of artist and song again.`
+
+**Changes:**
+- Fixed regression introduced on 2026-03-26 (commit `aa62ee9` — "Fix deprecated timedMetadata KVO and Sendable warnings") where ICY stream metadata stopped being surfaced in the mini player, full player, and lock screen
+- Root cause: when switching from `timedMetadata` KVO to `AVPlayerItemMetadataOutput`, the filter was changed from `metadata.commonKey == .commonKeyTitle` (abstract common-mapped key) to `item.identifier == .commonIdentifierTitle` (native identifier). ICY/Shoutcast/Icecast items arrive with `AVMetadataIdentifier.icyMetadataStreamTitle`, so every ICY title was silently dropped
+- `LibreRadio/Services/AudioPlayerService.swift`: `MetadataOutputHandler` now filters against a `titleIdentifiers` set containing both `.commonIdentifierTitle` and `.icyMetadataStreamTitle`; made the handler and its identifier set internal so tests can drive them directly
+- `LibreRadioTests/Services/AudioPlayerServiceTests.swift`: added two regression tests — one asserts the identifier set contains both known title identifiers, the other feeds a synthetic `AVMutableMetadataItem(.icyMetadataStreamTitle)` through the delegate and verifies `currentArtist`/`currentTrackTitle` are populated end-to-end
+- `PLAN.md`: documented the identifier-vs-commonKey trap in the Phase 2 implementation notes so the same mistake isn't repeated
+
 ## 2026-04-07 — Fix macOS crash when clicking Now Playing section
 
 **Prompt:** `/implement the macos version breaks when clicking the playing now section. check @dump.txt for the stacktrace`

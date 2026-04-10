@@ -1,13 +1,42 @@
 import AVFoundation
 import AVKit
 import Foundation
+import os
 
 // MARK: - Metadata Output Delegate
 
 /// Handles timed metadata from AVPlayerItemMetadataOutput.
 /// Separate class because AVPlayerItemMetadataOutputPushDelegate requires NSObjectProtocol.
-private class MetadataOutputHandler: NSObject, AVPlayerItemMetadataOutputPushDelegate {
+final class MetadataOutputHandler: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     weak var service: AudioPlayerService?
+
+    /// Identifiers that carry a track title. ICY/Shoutcast/Icecast streams deliver
+    /// their stream title as `.icyMetadataStreamTitle`; HLS and mp4 streams use the
+    /// common-mapped `.commonIdentifierTitle`. Filtering only on the common
+    /// identifier silently drops ICY metadata, which is what the vast majority of
+    /// Radio Browser stations emit.
+    static let titleIdentifiers: Set<AVMetadataIdentifier> = [
+        .commonIdentifierTitle,
+        .icyMetadataStreamTitle
+    ]
+
+    private static let logger = Logger(subsystem: "com.libreradio", category: "MetadataOutputHandler")
+
+    /// Called once per dropped item whose identifier is non-nil but not in
+    /// `titleIdentifiers`. Injectable so tests can capture the identifier
+    /// without reading from the unified logging system.
+    private let logUnrecognizedIdentifier: (AVMetadataIdentifier) -> Void
+
+    init(
+        logUnrecognizedIdentifier: @escaping (AVMetadataIdentifier) -> Void = { identifier in
+            MetadataOutputHandler.logger.debug(
+                "Dropping metadata item with unrecognized identifier: \(identifier.rawValue, privacy: .public)"
+            )
+        }
+    ) {
+        self.logUnrecognizedIdentifier = logUnrecognizedIdentifier
+        super.init()
+    }
 
     func metadataOutput(
         _ output: AVPlayerItemMetadataOutput,
@@ -18,9 +47,12 @@ private class MetadataOutputHandler: NSObject, AVPlayerItemMetadataOutputPushDel
         Task { @MainActor in
             for group in groups {
                 for item in group.items {
-                    if item.identifier == .commonIdentifierTitle,
-                       let value = try? await item.load(.stringValue),
-                       !value.isEmpty {
+                    guard let identifier = item.identifier else { continue }
+                    guard Self.titleIdentifiers.contains(identifier) else {
+                        self.logUnrecognizedIdentifier(identifier)
+                        continue
+                    }
+                    if let value = try? await item.load(.stringValue), !value.isEmpty {
                         service.parseStreamTitle(value)
                         return
                     }
