@@ -26,12 +26,19 @@ struct AboutView: View {
 
     /// Verbatim public-domain license declaration from radio-browser.info's homepage.
     ///
-    /// **Do not paraphrase or summarize.** Faithful reproduction of the license
-    /// text is the whole point of this section; the upstream project publishes
-    /// this exact wording as its data-license declaration.
-    private let radioBrowserLicenseQuote: String = """
-    This is a community driven effort (like wikipedia) with the aim of collecting as many internet radio and TV stations as possible. Any help is appreciated! Free for ALL! Data license: public domain, software license: GPL, server software: open source Open API for usage in own apps. Everyone is free to use the collected data (station names, tags, links to stream, links to homepages, language, country, state) in their works. I give all the rights I have at the accumulated data to the public domain.
-    """
+    /// **Do not paraphrase, summarize, or re-flow.** Each line below is reproduced
+    /// exactly as it appears on the upstream project's homepage, including the
+    /// absence of trailing punctuation on some lines. Faithful reproduction is
+    /// the whole point of this section.
+    private let radioBrowserLicenseIntro: String =
+        "This is a community driven effort (like wikipedia) with the aim of collecting as many internet radio and TV stations as possible. Any help is appreciated!"
+
+    private let radioBrowserLicenseBullets: [String] = [
+        "Free for ALL!",
+        "Data license: public domain, software license: GPL, server software: open source",
+        "Open API for usage in own apps",
+        "Everyone is free to use the collected data (station names, tags, links to stream, links to homepages, language, country, state) in their works. I give all the rights I have at the accumulated data to the public domain."
+    ]
 
     private var appVersion: String {
         aboutVersionString(
@@ -108,16 +115,29 @@ struct AboutView: View {
             Text("All station data used by LibreRadio — including station names, tags, stream URLs, homepage URLs, language, country, and state — is released into the **public domain** by the radio-browser.info project. No account, API key, or individual permission is required to use this data. The declaration below is published on radio-browser.info's homepage:")
                 .font(.body)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top, spacing: 10) {
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
                         .fill(Color.accentColor)
                         .frame(width: 4)
-                    Text(radioBrowserLicenseQuote)
-                        .font(.callout)
-                        .italic()
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(radioBrowserLicenseIntro)
+                            .font(.callout)
+                            .italic()
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(radioBrowserLicenseBullets, id: \.self) { line in
+                                Text(line)
+                                    .font(.callout)
+                                    .italic()
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding(.leading, 12)
+                    }
                 }
                 Text("— radio-browser.info")
                     .font(.caption)
