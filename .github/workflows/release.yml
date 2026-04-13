@@ -80,7 +80,7 @@ jobs:
       - name: Package app
         run: |
           APP_PATH="build/Build/Products/Release-maccatalyst/LibreRadio.app"
-          ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS.zip
+          ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS-$GITHUB_REF_NAME.zip
 
       - name: Notarize app
         env:
@@ -93,7 +93,7 @@ jobs:
 
           # Submit the artifact; do NOT use --wait, we poll ourselves so we
           # can tolerate transient network errors during the long poll phase.
-          xcrun notarytool submit LibreRadio-macOS.zip \
+          xcrun notarytool submit LibreRadio-macOS-$GITHUB_REF_NAME.zip \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" > "$SUBMIT_LOG" 2>&1
@@ -152,19 +152,24 @@ jobs:
           xcrun stapler staple "$APP_PATH"
           xcrun stapler validate "$APP_PATH"
           spctl --assess --type execute --verbose "$APP_PATH"
-          rm LibreRadio-macOS.zip
-          ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS.zip
+          rm LibreRadio-macOS-$GITHUB_REF_NAME.zip
+          ditto -c -k --keepParent "$APP_PATH" LibreRadio-macOS-$GITHUB_REF_NAME.zip
 
       - name: Create DMG
         run: |
           APP_PATH="build/Build/Products/Release-maccatalyst/LibreRadio.app"
-          hdiutil create -volname LibreRadio -srcfolder "$APP_PATH" \
-            -ov -format UDZO LibreRadio-macOS.dmg
+          DMG_STAGE="$RUNNER_TEMP/dmg-stage"
+          mkdir -p "$DMG_STAGE"
+          cp -R "$APP_PATH" "$DMG_STAGE/"
+          ln -s /Applications "$DMG_STAGE/Applications"
+          hdiutil create -volname LibreRadio -srcfolder "$DMG_STAGE" \
+            -ov -format UDZO LibreRadio-macOS-$GITHUB_REF_NAME.dmg
+          rm -rf "$DMG_STAGE"
 
       - name: Sign DMG
         run: |
           codesign --force --sign "Developer ID Application" \
-            --timestamp LibreRadio-macOS.dmg
+            --timestamp LibreRadio-macOS-$GITHUB_REF_NAME.dmg
 
       - name: Notarize DMG
         env:
@@ -177,7 +182,7 @@ jobs:
 
           # Submit the artifact; do NOT use --wait, we poll ourselves so we
           # can tolerate transient network errors during the long poll phase.
-          xcrun notarytool submit LibreRadio-macOS.dmg \
+          xcrun notarytool submit LibreRadio-macOS-$GITHUB_REF_NAME.dmg \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PWD" \
             --team-id "$APPLE_TEAM_ID" > "$DMG_LOG" 2>&1
@@ -229,14 +234,14 @@ jobs:
             echo "::error::Timed out waiting for DMG notarization (last status: ${DMG_STATUS:-unknown})"
             exit 1
           fi
-          xcrun stapler staple LibreRadio-macOS.dmg
-          xcrun stapler validate LibreRadio-macOS.dmg
-          codesign --verify --deep --strict LibreRadio-macOS.dmg
+          xcrun stapler staple LibreRadio-macOS-$GITHUB_REF_NAME.dmg
+          xcrun stapler validate LibreRadio-macOS-$GITHUB_REF_NAME.dmg
+          codesign --verify --deep --strict LibreRadio-macOS-$GITHUB_REF_NAME.dmg
 
       - name: Compute checksums
         run: |
-          shasum -a 256 LibreRadio-macOS.zip > LibreRadio-macOS.zip.sha256
-          shasum -a 256 LibreRadio-macOS.dmg > LibreRadio-macOS.dmg.sha256
+          shasum -a 256 LibreRadio-macOS-$GITHUB_REF_NAME.zip > LibreRadio-macOS-$GITHUB_REF_NAME.zip.sha256
+          shasum -a 256 LibreRadio-macOS-$GITHUB_REF_NAME.dmg > LibreRadio-macOS-$GITHUB_REF_NAME.dmg.sha256
 
       - name: Create GitHub Release
         env:
@@ -248,10 +253,10 @@ jobs:
             PRERELEASE="--prerelease"
           fi
           gh release create "$TAG_NAME" \
-            LibreRadio-macOS.zip \
-            LibreRadio-macOS.zip.sha256 \
-            LibreRadio-macOS.dmg \
-            LibreRadio-macOS.dmg.sha256 \
+            LibreRadio-macOS-$GITHUB_REF_NAME.zip \
+            LibreRadio-macOS-$GITHUB_REF_NAME.zip.sha256 \
+            LibreRadio-macOS-$GITHUB_REF_NAME.dmg \
+            LibreRadio-macOS-$GITHUB_REF_NAME.dmg.sha256 \
             --title "LibreRadio $TAG_NAME" \
             --generate-notes \
             ${PRERELEASE:+"$PRERELEASE"}
